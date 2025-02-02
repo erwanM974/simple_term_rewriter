@@ -15,14 +15,4 @@ limitations under the License.
 */
 
 
-pub mod lang;
-pub mod rules;
-
-pub mod glog;
-
-pub mod test;
-
-
-
-
-
+mod barebones_only;

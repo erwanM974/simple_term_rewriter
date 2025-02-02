@@ -24,7 +24,7 @@ use image_colored_text::draw::multi_line::draw_multiline_colored_text;
 use imageproc::drawing::draw_filled_rect_mut;
 use imageproc::rect::Rect;
 
-use super::step_drawer::MY_COLOR_WHITE;
+use crate::tests::barebones_only::glog::step_drawer::MY_COLOR_WHITE;
 
 
 

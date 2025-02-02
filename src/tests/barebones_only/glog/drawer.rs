@@ -27,10 +27,10 @@ use crate::process::context::RewriteContext;
 use crate::process::node::RewriteNodeKind;
 use crate::process::param::RewriteParameterization;
 use crate::process::verdict::local::RewriteLocalVerdict;
-use crate::tests::lang::{MinimalExampleInterface, MinimalExampleLangOperators};
+use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators};
 
-use super::node_drawer::MinimalRewritingNodeDrawer;
-use super::step_drawer::MinimalRewritingStepDrawer;
+use crate::tests::barebones_only::glog::node_drawer::MinimalRewritingNodeDrawer;
+use crate::tests::barebones_only::glog::step_drawer::MinimalRewritingStepDrawer;
 
 
 

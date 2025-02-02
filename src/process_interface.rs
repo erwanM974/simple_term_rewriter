@@ -18,23 +18,23 @@ limitations under the License.
 
 use graph_process_manager_core::{delegate::{delegate::GenericProcessDelegate, priorities::GenericProcessPriorities}, handler::filter::AbstractFilter, manager::{logger::AbstractProcessLogger, manager::GenericProcessManager}, queued_steps::queue::strategy::QueueSearchStrategy};
 
-use crate::{core::{interface::SimpleTermRewritingInterface, term::LanguageTerm}, process::{conf::RewriteConfig, context::RewriteContext, filter::{elim::RewriteFilterEliminationKind, filter::RewriteFilterCriterion}, node::RewriteNodeKind, param::RewriteParameterization, priorities::RewritePriorities, step::RewriteStepKind}};
+use crate::{core::{interface::BarebonesTermRewritingInterface, term::LanguageTerm}, process::{conf::RewriteConfig, context::RewriteContext, filter::{elim::RewriteFilterEliminationKind, filter::RewriteFilterCriterion}, node::RewriteNodeKind, param::RewriteParameterization, priorities::RewritePriorities, step::RewriteStepKind}};
 
 
 
 
 
-pub fn rewrite_term<STRI : SimpleTermRewritingInterface + 'static>(
-    term : &LanguageTerm<STRI::LanguageOperator>,
+pub fn rewrite_term<STRI : BarebonesTermRewritingInterface + 'static>(
+    term : &LanguageTerm<STRI::LanguageOperatorSymbol>,
     strategy : QueueSearchStrategy,
     priorities : GenericProcessPriorities<RewritePriorities<STRI::TransformationKind>>,
     param : RewriteParameterization<STRI>,
     filters : Vec<Box<dyn AbstractFilter<RewriteFilterCriterion,RewriteFilterEliminationKind>>>,
     loggers : Vec<Box< dyn AbstractProcessLogger<RewriteConfig<STRI>>>>
-) -> LanguageTerm<STRI::LanguageOperator> {
+) -> LanguageTerm<STRI::LanguageOperatorSymbol> {
 
     let rewrite_ctx = RewriteContext{};
-    let delegate : GenericProcessDelegate<RewriteStepKind<STRI>,RewriteNodeKind<STRI::LanguageOperator>,RewritePriorities<STRI::TransformationKind>> =
+    let delegate : GenericProcessDelegate<RewriteStepKind<STRI>,RewriteNodeKind<STRI::LanguageOperatorSymbol>,RewritePriorities<STRI::TransformationKind>> =
         GenericProcessDelegate::new(
             strategy,
             priorities

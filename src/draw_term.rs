@@ -32,11 +32,11 @@ use crate::core::term::LanguageTerm;
 
 
 
-pub trait TermDrawingContext<LanguageOperator : Clone + PartialEq + Eq + Hash> {
+pub trait TermDrawingContext<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
 
     fn get_operator_representation_as_graphviz_node_style(
         &self, 
-        operator : &LanguageOperator
+        operator : &LanguageOperatorSymbol
     ) -> GraphvizNodeStyle;
 
 }

@@ -24,17 +24,17 @@ use crate::process::verdict::local::RewriteLocalVerdict;
 
 
 
-pub struct RewriteGlobalVerdict<LanguageOperator : Clone + PartialEq + Eq + Hash>  {
-    pub normalized_terms : Vec<LanguageTerm<LanguageOperator>>
+pub struct RewriteGlobalVerdict<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>  {
+    pub normalized_terms : Vec<LanguageTerm<LanguageOperatorSymbol>>
 }
 
-impl<LanguageOperator : Clone + PartialEq + Eq + Hash> fmt::Display for RewriteGlobalVerdict<LanguageOperator> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> fmt::Display for RewriteGlobalVerdict<LanguageOperatorSymbol> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f,"")
     }
 }
 
-impl<LanguageOperator : Clone + PartialEq + Eq + Hash> AbstractGlobalVerdict<RewriteLocalVerdict<LanguageOperator>> for RewriteGlobalVerdict<LanguageOperator> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> AbstractGlobalVerdict<RewriteLocalVerdict<LanguageOperatorSymbol>> for RewriteGlobalVerdict<LanguageOperatorSymbol> {
 
     fn is_verdict_pertinent_for_process() -> bool {
         false
@@ -45,7 +45,7 @@ impl<LanguageOperator : Clone + PartialEq + Eq + Hash> AbstractGlobalVerdict<Rew
     }
 
     fn update_with_local_verdict(self,
-                                 local_verdict: &RewriteLocalVerdict<LanguageOperator>) -> Self {
+                                 local_verdict: &RewriteLocalVerdict<LanguageOperatorSymbol>) -> Self {
         let mut terms = self.normalized_terms;
         terms.push(local_verdict.got_term.clone());
         Self{normalized_terms:terms}

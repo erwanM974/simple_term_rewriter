@@ -14,21 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
-use std::hash::Hash;
-use std::fmt;
-
-use crate::core::term::LanguageTerm;
-
-pub struct RewriteLocalVerdict<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub got_term : LanguageTerm<LanguageOperatorSymbol>
-}
-
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> fmt::Display for RewriteLocalVerdict<LanguageOperatorSymbol> {
-
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"")
-    }
-
-}
-
+pub mod binary_idempotence;
+pub mod defactorize;
+pub mod factorize;
+pub mod flush;
+pub mod reorder_commute;
+pub mod simpl_neutral_elements;
+pub mod unary_composition;

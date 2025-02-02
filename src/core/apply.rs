@@ -22,23 +22,23 @@ use crate::core::term::LanguageTerm;
 /** 
  * The result of the application of a given rewrite rule at a given position
  * **/
- pub struct TermTransformationResult<STRI : SimpleTermRewritingInterface> {
+ pub struct TermTransformationResult<STRI : BarebonesTermRewritingInterface> {
     pub kind : STRI::TransformationKind,
     pub position : PositionInLanguageTerm,
-    pub result : LanguageTerm<STRI::LanguageOperator>
+    pub result : LanguageTerm<STRI::LanguageOperatorSymbol>
  }
 
  
-impl<STRI : SimpleTermRewritingInterface>  TermTransformationResult<STRI> {
+impl<STRI : BarebonesTermRewritingInterface>  TermTransformationResult<STRI> {
     pub fn new(
         kind : STRI::TransformationKind,
         position : PositionInLanguageTerm,
-        result : LanguageTerm<STRI::LanguageOperator>) -> Self {
+        result : LanguageTerm<STRI::LanguageOperatorSymbol>) -> Self {
             Self{kind,position,result}
     }
     pub fn new_at_root(
         kind : STRI::TransformationKind,
-        result : LanguageTerm<STRI::LanguageOperator>) -> Self {
+        result : LanguageTerm<STRI::LanguageOperatorSymbol>) -> Self {
             Self::new(kind, PositionInLanguageTerm::get_root_position(),result)
     }
 }
@@ -47,9 +47,9 @@ impl<STRI : SimpleTermRewritingInterface>  TermTransformationResult<STRI> {
 
 
 
-pub fn get_transformations<STRI : SimpleTermRewritingInterface>(
+pub fn get_transformations<STRI : BarebonesTermRewritingInterface>(
     rewrite_rules : &Vec<Box<dyn RewriteRule<STRI>>>,
-    term : &LanguageTerm<STRI::LanguageOperator>,
+    term : &LanguageTerm<STRI::LanguageOperatorSymbol>,
     keep_only_one : bool
 ) 
         -> Vec<TermTransformationResult<STRI>> 
@@ -61,21 +61,10 @@ pub fn get_transformations<STRI : SimpleTermRewritingInterface>(
     for (n,sub_term) in term.sub_terms.iter().enumerate() {
         for sub_transfo in get_transformations::<STRI>(rewrite_rules, sub_term, keep_only_one) {
             let upd_pos = sub_transfo.position.position_as_nth_sub_term(n);
-            let mut upd_sub_terms : Vec<LanguageTerm<STRI::LanguageOperator>> = term.sub_terms.clone();
+            let mut upd_sub_terms : Vec<LanguageTerm<STRI::LanguageOperatorSymbol>> = term.sub_terms.clone();
             upd_sub_terms.remove(n);
             upd_sub_terms.insert(n,sub_transfo.result);
-            /*if n >= 1 {
-                for left_neighbor in term.sub_terms.iter().take(n-1) {
-                    upd_sub_terms.push(left_neighbor.clone());
-                }
-            }
-            upd_sub_terms.push(sub_transfo.result);
-            if n < term.sub_terms.len() - 1 {
-                for right_neighbor in term.sub_terms.iter().skip(n) {
-                    upd_sub_terms.push(right_neighbor.clone());
-                }
-            }*/
-            
+            // ***
             let res = TermTransformationResult::new(
                 sub_transfo.kind,
                 upd_pos,
@@ -92,10 +81,12 @@ pub fn get_transformations<STRI : SimpleTermRewritingInterface>(
 
 
 
-
-fn get_root_transformations<STRI : SimpleTermRewritingInterface>(
+/**
+  f
+ **/
+fn get_root_transformations<STRI : BarebonesTermRewritingInterface>(
     rewrite_rules : &Vec<Box<dyn RewriteRule<STRI>>>,
-    term : &LanguageTerm<STRI::LanguageOperator>,
+    term : &LanguageTerm<STRI::LanguageOperatorSymbol>,
     keep_only_one : bool
 ) 
         -> Vec<TermTransformationResult<STRI>> 

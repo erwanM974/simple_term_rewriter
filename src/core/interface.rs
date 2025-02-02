@@ -22,10 +22,12 @@ use std::fmt;
 
 
 
+/**
+ The barebones interface
+ **/
+pub trait BarebonesTermRewritingInterface {
 
-pub trait SimpleTermRewritingInterface {
-
-    type LanguageOperator : Clone + PartialEq + Eq + Hash;
+    type LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash;
 
     type TransformationKind : Clone + PartialEq + Eq + Hash + std::fmt::Display;
 

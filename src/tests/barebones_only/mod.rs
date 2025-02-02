@@ -15,20 +15,14 @@ limitations under the License.
 */
 
 
-use std::hash::Hash;
-use std::fmt;
+pub mod lang;
+pub mod rules;
 
-use crate::core::term::LanguageTerm;
+pub mod glog;
 
-pub struct RewriteLocalVerdict<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub got_term : LanguageTerm<LanguageOperatorSymbol>
-}
+pub mod test;
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> fmt::Display for RewriteLocalVerdict<LanguageOperatorSymbol> {
 
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"")
-    }
 
-}
+
 

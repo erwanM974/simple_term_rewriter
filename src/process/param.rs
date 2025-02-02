@@ -17,22 +17,22 @@ limitations under the License.
 
 use graph_process_manager_core::manager::config::AbstractProcessParameterization;
 
-use crate::core::{interface::SimpleTermRewritingInterface, rule::RewriteRule};
+use crate::core::{interface::BarebonesTermRewritingInterface, rule::RewriteRule};
 
 
 
-pub struct RewriteParameterization<STRI : SimpleTermRewritingInterface> {
+pub struct RewriteParameterization<STRI : BarebonesTermRewritingInterface> {
     pub phases : Vec<Vec<Box<dyn RewriteRule<STRI>>>>,
     pub keep_only_one : bool
 }
 
-impl<STRI : SimpleTermRewritingInterface> RewriteParameterization<STRI> {
+impl<STRI : BarebonesTermRewritingInterface> RewriteParameterization<STRI> {
     pub fn new(phases : Vec<Vec<Box<dyn RewriteRule<STRI>>>>, keep_only_one: bool) -> Self {
         Self { phases, keep_only_one }
     }
 }
 
-impl<STRI : SimpleTermRewritingInterface> AbstractProcessParameterization for RewriteParameterization<STRI> {
+impl<STRI : BarebonesTermRewritingInterface> AbstractProcessParameterization for RewriteParameterization<STRI> {
     fn get_param_as_strings(&self) -> Vec<String> {
         let mut strs = vec!["process = rewriting;".to_string()];
         strs.push(format!("keep_only_one = {:}", self.keep_only_one));

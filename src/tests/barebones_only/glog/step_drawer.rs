@@ -25,10 +25,10 @@ use crate::process::conf::RewriteConfig;
 use crate::process::context::RewriteContext;
 use crate::process::param::RewriteParameterization;
 use crate::process::step::RewriteStepKind;
-use crate::tests::lang::MinimalExampleInterface;
+use crate::tests::barebones_only::lang::MinimalExampleInterface;
 
-use super::common::{DRAWING_GRAPHIC_FONT, SCALE};
-use super::util::new_image_with_colored_text;
+use crate::tests::barebones_only::glog::common::{DRAWING_GRAPHIC_FONT, SCALE};
+use crate::tests::barebones_only::glog::util::new_image_with_colored_text;
 
 
 

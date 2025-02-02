@@ -24,25 +24,25 @@ use crate::process::filter::elim::RewriteFilterEliminationKind;
 /** 
  * Additional criterion by which a filter could eliminate a node from the graph that is explored.
  * **/
-pub struct RewriteFilterCriterion/*<STRI : SimpleTermRewritingInterface>*/{
+pub struct RewriteFilterCriterion/*<STRI : BarebonesTermRewritingInterface>*/{
     // we might want to limit the number of times transformations of a specific kind are performed
     // to that end, we need to keep track of that number
     //pub transformations_kinds_occurrences : HashMap<STRI::TransformationKind, u32>
 }
 
-impl/*<STRI : SimpleTermRewritingInterface>*/ fmt::Display for RewriteFilterCriterion/*<STRI>*/ {
+impl/*<STRI : BarebonesTermRewritingInterface>*/ fmt::Display for RewriteFilterCriterion/*<STRI>*/ {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f,"")
     }
 }
 
-pub enum RewriteFilter/*<STRI : SimpleTermRewritingInterface>*/ {
+pub enum RewriteFilter/*<STRI : BarebonesTermRewritingInterface>*/ {
     //FilterOnMaxRuleApplication(STRI::TransformationKind,u32),
     MaxProcessDepth(u32),
     MaxNodeNumber(u32)
 }
 
-impl/*<STRI : SimpleTermRewritingInterface>*/ fmt::Display for RewriteFilter/*<STRI> */{
+impl/*<STRI : BarebonesTermRewritingInterface>*/ fmt::Display for RewriteFilter/*<STRI> */{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             /*RewriteFilter::FilterOnMaxRuleApplication(rule,num) => {
@@ -58,7 +58,7 @@ impl/*<STRI : SimpleTermRewritingInterface>*/ fmt::Display for RewriteFilter/*<S
     }
 }
 
-impl/*<STRI : SimpleTermRewritingInterface>*/ AbstractFilter<RewriteFilterCriterion/*<STRI>*/,RewriteFilterEliminationKind>  for RewriteFilter/*<STRI>*/ {
+impl/*<STRI : BarebonesTermRewritingInterface>*/ AbstractFilter<RewriteFilterCriterion/*<STRI>*/,RewriteFilterEliminationKind>  for RewriteFilter/*<STRI>*/ {
 
     fn apply_filter(&self,
                     depth: u32,

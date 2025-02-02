@@ -17,7 +17,7 @@ limitations under the License.
 
 use crate::core::{rule::RewriteRule, term::LanguageTerm};
 
-use super::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
+use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
 
 
 

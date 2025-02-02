@@ -25,15 +25,15 @@ use std::hash::Hash;
  * A concrete term in the Language which we are considering.
  * **/
  #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct LanguageTerm<LanguageOperator : Clone + PartialEq + Eq + Hash> {
-    pub operator : LanguageOperator,
-    pub sub_terms : Vec<LanguageTerm<LanguageOperator>>
+pub struct LanguageTerm<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    pub operator : LanguageOperatorSymbol,
+    pub sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>>
 }
 
 
-impl<LanguageOperator : Clone + PartialEq + Eq + Hash> LanguageTerm<LanguageOperator> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> LanguageTerm<LanguageOperatorSymbol> {
 
-    pub fn new(operator : LanguageOperator,sub_terms : Vec<LanguageTerm<LanguageOperator>>) -> Self {
+    pub fn new(operator : LanguageOperatorSymbol,sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>>) -> Self {
         Self{operator,sub_terms}
     }
 

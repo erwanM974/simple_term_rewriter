@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 
-use super::{interface::SimpleTermRewritingInterface, term::LanguageTerm};
+use crate::core::{interface::BarebonesTermRewritingInterface, term::LanguageTerm};
 
 
 
@@ -24,7 +24,7 @@ use super::{interface::SimpleTermRewritingInterface, term::LanguageTerm};
 /** 
  * A rewrite rule that may be applied at the root position of a term.
  * **/
-pub trait RewriteRule<STRI : SimpleTermRewritingInterface> : std::fmt::Display {
+pub trait RewriteRule<STRI : BarebonesTermRewritingInterface> : std::fmt::Display {
 
     /** 
      * Returns an object that describes this rewrite rule.
@@ -34,7 +34,7 @@ pub trait RewriteRule<STRI : SimpleTermRewritingInterface> : std::fmt::Display {
     /** 
      * If the rule is applicable at the root position of the given term, then it returns the result of its application.
      * **/
-    fn try_apply(&self, term : &LanguageTerm<STRI::LanguageOperator>) -> Option<LanguageTerm<STRI::LanguageOperator>>;
+    fn try_apply(&self, term : &LanguageTerm<STRI::LanguageOperatorSymbol>) -> Option<LanguageTerm<STRI::LanguageOperatorSymbol>>;
 
 }
 
@@ -42,9 +42,9 @@ pub trait RewriteRule<STRI : SimpleTermRewritingInterface> : std::fmt::Display {
 /** 
  * A predicate that may hold or not on terms of the language which we are considering.
  * **/
-pub trait PredicateOnTerm<STRI : SimpleTermRewritingInterface> : std::fmt::Display {
+pub trait PredicateOnTerm<STRI : BarebonesTermRewritingInterface> : std::fmt::Display {
 
-    fn term_satisfies(&self, term : &LanguageTerm<STRI::LanguageOperator>) -> bool;
+    fn term_satisfies(&self, term : &LanguageTerm<STRI::LanguageOperatorSymbol>) -> bool;
 
 }
 

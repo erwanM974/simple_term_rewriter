@@ -24,7 +24,7 @@ use crate::process::conf::RewriteConfig;
 use crate::process::context::RewriteContext;
 use crate::process::node::RewriteNodeKind;
 use crate::process::param::RewriteParameterization;
-use crate::tests::lang::{MinimalExampleInterface, MinimalExampleLangOperators};
+use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators};
 
 
 

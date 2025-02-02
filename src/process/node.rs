@@ -27,21 +27,21 @@ use crate::core::term::LanguageTerm;
 
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct RewriteNodeKind<LanguageOperator : Clone + PartialEq + Eq + Hash> {
-    pub term : LanguageTerm<LanguageOperator>,
+pub struct RewriteNodeKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    pub term : LanguageTerm<LanguageOperatorSymbol>,
     pub rewrite_system_index : usize
 }
 
-impl<LanguageOperator : Clone + PartialEq + Eq + Hash> RewriteNodeKind<LanguageOperator> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteNodeKind<LanguageOperatorSymbol> {
     pub fn new(
-        term : LanguageTerm<LanguageOperator>,
+        term : LanguageTerm<LanguageOperatorSymbol>,
         rewrite_system_index : usize) -> Self {
             Self { term, rewrite_system_index }
     }
 }
 
 
-impl<LanguageOperator : Clone + PartialEq + Eq + Hash> AbstractNodeKind for RewriteNodeKind<LanguageOperator> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> AbstractNodeKind for RewriteNodeKind<LanguageOperatorSymbol> {
     fn is_included_for_memoization(&self, memoized_node: &Self) -> bool {
         self.term == memoized_node.term && self.rewrite_system_index == memoized_node.rewrite_system_index
     }

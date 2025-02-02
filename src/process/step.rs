@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use crate::core::{apply::TermTransformationResult, interface::SimpleTermRewritingInterface};
+use crate::core::{apply::TermTransformationResult, interface::BarebonesTermRewritingInterface};
 
 
 
 
-pub enum RewriteStepKind<STRI : SimpleTermRewritingInterface> {
+pub enum RewriteStepKind<STRI : BarebonesTermRewritingInterface> {
     Transform(TermTransformationResult<STRI>),
     GoToNextPhase
 }

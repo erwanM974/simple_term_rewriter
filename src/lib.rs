@@ -20,6 +20,8 @@ pub mod process;
 pub mod process_interface;
 pub mod draw_term;
 
+pub mod builtin_trs;
+
 
 #[cfg(test)]
 mod tests;

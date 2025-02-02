@@ -16,7 +16,7 @@ limitations under the License.
 
 use std::marker::PhantomData;
 use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
-use crate::core::interface::SimpleTermRewritingInterface;
+use crate::core::interface::BarebonesTermRewritingInterface;
 use crate::process::context::RewriteContext;
 use crate::process::filter::elim::RewriteFilterEliminationKind;
 use crate::process::filter::filter::RewriteFilterCriterion;
@@ -29,22 +29,22 @@ use crate::process::verdict::global::RewriteGlobalVerdict;
 use crate::process::verdict::local::RewriteLocalVerdict;
 
 
-pub struct RewriteConfig<STRI : SimpleTermRewritingInterface> {
+pub struct RewriteConfig<STRI : BarebonesTermRewritingInterface> {
     phantom: PhantomData<STRI>
 }
 
 pub struct RewriteStaticLocalVerdictAnalysisProof{}
 
-impl<STRI : SimpleTermRewritingInterface> AbstractProcessConfiguration for RewriteConfig<STRI> {
+impl<STRI : BarebonesTermRewritingInterface> AbstractProcessConfiguration for RewriteConfig<STRI> {
     type Context = RewriteContext;
     type Parameterization = RewriteParameterization<STRI>;
-    type NodeKind = RewriteNodeKind<STRI::LanguageOperator>;
+    type NodeKind = RewriteNodeKind<STRI::LanguageOperatorSymbol>;
     type StepKind = RewriteStepKind<STRI>;
     type Priorities = RewritePriorities<STRI::TransformationKind>;
     type FilterCriterion = RewriteFilterCriterion;
     type FilterEliminationKind = RewriteFilterEliminationKind;
-    type LocalVerdict = RewriteLocalVerdict<STRI::LanguageOperator>;
+    type LocalVerdict = RewriteLocalVerdict<STRI::LanguageOperatorSymbol>;
     type StaticLocalVerdictAnalysisProof = RewriteStaticLocalVerdictAnalysisProof;
-    type GlobalVerdict = RewriteGlobalVerdict<STRI::LanguageOperator>;
+    type GlobalVerdict = RewriteGlobalVerdict<STRI::LanguageOperatorSymbol>;
     type ProcessHandler = RewriteProcessHandler;
 }

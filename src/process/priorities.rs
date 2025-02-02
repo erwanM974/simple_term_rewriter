@@ -20,9 +20,9 @@ use std::hash::Hash;
 use std::{collections::HashMap, fmt};
 use graph_process_manager_core::delegate::priorities::AbstractPriorities;
 
-use crate::core::interface::SimpleTermRewritingInterface;
+use crate::core::interface::BarebonesTermRewritingInterface;
 
-use super::step::RewriteStepKind;
+use crate::process::step::RewriteStepKind;
 
 
 
@@ -68,7 +68,7 @@ impl<TransformationKind : Clone + PartialEq + Eq + Hash> fmt::Display for Rewrit
     }
 }
 
-impl<STRI : SimpleTermRewritingInterface> AbstractPriorities<RewriteStepKind<STRI>> for RewritePriorities<STRI::TransformationKind>{
+impl<STRI : BarebonesTermRewritingInterface> AbstractPriorities<RewriteStepKind<STRI>> for RewritePriorities<STRI::TransformationKind>{
     fn get_priority_of_step(&self, step: &RewriteStepKind<STRI>) -> i32 {
         match step {
             RewriteStepKind::Transform(transfo) => {

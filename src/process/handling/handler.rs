@@ -20,7 +20,7 @@ use graph_process_manager_core::handler::handler::AbstractProcessHandler;
 use graph_process_manager_core::queued_steps::step::GenericStep;
 
 
-use crate::core::interface::SimpleTermRewritingInterface;
+use crate::core::interface::BarebonesTermRewritingInterface;
 use crate::process::conf::{RewriteConfig, RewriteStaticLocalVerdictAnalysisProof};
 use crate::process::context::RewriteContext;
 use crate::process::filter::filter::RewriteFilterCriterion;
@@ -33,14 +33,14 @@ use crate::core::apply::get_transformations;
 
 pub struct RewriteProcessHandler {}
 
-impl<STRI : SimpleTermRewritingInterface> AbstractProcessHandler<RewriteConfig<STRI>> for RewriteProcessHandler {
+impl<STRI : BarebonesTermRewritingInterface> AbstractProcessHandler<RewriteConfig<STRI>> for RewriteProcessHandler {
 
     fn process_new_step(_context: &RewriteContext,
                         _param : &RewriteParameterization<STRI>,
-                        parent_state: &GenericNode<RewriteNodeKind<STRI::LanguageOperator>>,
+                        parent_state: &GenericNode<RewriteNodeKind<STRI::LanguageOperatorSymbol>>,
                         step_to_process: &GenericStep<RewriteStepKind<STRI>>,
                         _new_state_id: u32,
-                        _node_counter: u32) -> RewriteNodeKind<STRI::LanguageOperator> {
+                        _node_counter: u32) -> RewriteNodeKind<STRI::LanguageOperatorSymbol> {
         match step_to_process.kind {
             RewriteStepKind::GoToNextPhase => {
                 RewriteNodeKind::new(parent_state.kind.term.clone(),parent_state.kind.rewrite_system_index + 1)
@@ -53,7 +53,7 @@ impl<STRI : SimpleTermRewritingInterface> AbstractProcessHandler<RewriteConfig<S
 
     fn get_criterion(_context: &RewriteContext,
                      _param : &RewriteParameterization<STRI>,
-                     _parent_state: &GenericNode<RewriteNodeKind<STRI::LanguageOperator>>,
+                     _parent_state: &GenericNode<RewriteNodeKind<STRI::LanguageOperatorSymbol>>,
                      _step_to_process: &GenericStep<RewriteStepKind<STRI>>,
                      _new_state_id: u32,
                      _node_counter: u32) -> RewriteFilterCriterion {
@@ -62,7 +62,7 @@ impl<STRI : SimpleTermRewritingInterface> AbstractProcessHandler<RewriteConfig<S
 
     fn collect_next_steps(_context: &RewriteContext,
                           param : &RewriteParameterization<STRI>,
-                          parent_node_kind: &RewriteNodeKind<STRI::LanguageOperator>)
+                          parent_node_kind: &RewriteNodeKind<STRI::LanguageOperatorSymbol>)
                 -> Vec<RewriteStepKind<STRI>> {
         match param.phases.get(parent_node_kind.rewrite_system_index) {
             None => {
@@ -89,20 +89,20 @@ impl<STRI : SimpleTermRewritingInterface> AbstractProcessHandler<RewriteConfig<S
 
     fn get_local_verdict_when_no_child(_context: &RewriteContext,
                                        _param : &RewriteParameterization<STRI>,
-                                       node_kind: &RewriteNodeKind<STRI::LanguageOperator>) -> RewriteLocalVerdict<STRI::LanguageOperator> {
+                                       node_kind: &RewriteNodeKind<STRI::LanguageOperatorSymbol>) -> RewriteLocalVerdict<STRI::LanguageOperatorSymbol> {
         RewriteLocalVerdict{got_term:node_kind.term.clone()}
     }
 
     fn get_local_verdict_from_static_analysis(_context: &RewriteContext,
                                               _param : &RewriteParameterization<STRI>,
-                                              _node_kind: &mut RewriteNodeKind<STRI::LanguageOperator>)
-                -> Option<(RewriteLocalVerdict<STRI::LanguageOperator>,RewriteStaticLocalVerdictAnalysisProof)> {
+                                              _node_kind: &mut RewriteNodeKind<STRI::LanguageOperatorSymbol>)
+                -> Option<(RewriteLocalVerdict<STRI::LanguageOperatorSymbol>,RewriteStaticLocalVerdictAnalysisProof)> {
         None
     }
 
     fn pursue_process_after_static_verdict(_context: &RewriteContext,
                                            _param : &RewriteParameterization<STRI>,
-                                           _loc_verd: &RewriteLocalVerdict<STRI::LanguageOperator>) -> bool {
+                                           _loc_verd: &RewriteLocalVerdict<STRI::LanguageOperatorSymbol>) -> bool {
         true
     }
 }

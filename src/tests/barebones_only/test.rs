@@ -21,9 +21,10 @@ use graph_process_manager_core::{delegate::priorities::GenericProcessPriorities,
 use graph_process_manager_loggers::graphviz::{format::GraphVizProcessLoggerLayout, logger::GenericGraphVizLogger};
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
-use crate::{core::{rule::RewriteRule, term::LanguageTerm}, process::{conf::RewriteConfig, param::RewriteParameterization, priorities::RewritePriorities}, process_interface::rewrite_term, tests::glog::drawer::MinimalRewritingProcessDrawer};
+use crate::{core::{rule::RewriteRule, term::LanguageTerm}, process::{conf::RewriteConfig, param::RewriteParameterization, priorities::RewritePriorities}, process_interface::rewrite_term};
+use crate::tests::barebones_only::glog::drawer::MinimalRewritingProcessDrawer;
 
-use super::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
+use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
 
 
 pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
