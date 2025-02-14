@@ -15,6 +15,5 @@ limitations under the License.
 */
 
 
-pub mod interface;
-pub mod builtin_transfo_kind;
-pub(in crate::builtin_trs) mod rules;
+pub mod builtin_transfo;
+pub mod rules;

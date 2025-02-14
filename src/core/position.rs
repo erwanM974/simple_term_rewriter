@@ -21,24 +21,9 @@ use std::fmt;
 
 
 
-
-/**
- The barebones interface
- **/
-pub trait BarebonesTermRewritingInterface {
-
-    type LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash;
-
-    type TransformationKind : Clone + PartialEq + Eq + Hash + std::fmt::Display;
-
-}
-
-
-
-
 /** 
  * An object that keeps track of positions in a concrete 
- * term of thet Language which we are considering.
+ * term of the Language which we are considering.
  * **/
  #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum PositionInLanguageTerm {
@@ -48,6 +33,18 @@ pub enum PositionInLanguageTerm {
 
 
 impl PositionInLanguageTerm {
+
+    pub fn get_depth(&self) -> u32 {
+        match self{
+            PositionInLanguageTerm::Root => {
+                0
+            }
+            PositionInLanguageTerm::Child(_, sub_pos) => {
+                1 + sub_pos.get_depth()
+            }
+        }
+    }
+
     /** 
      * Get position epsilon i.e. that of the toot of the term.
      * **/

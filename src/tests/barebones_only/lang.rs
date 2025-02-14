@@ -17,7 +17,6 @@ limitations under the License.
 
 use std::fmt;
 
-use crate::core::interface::BarebonesTermRewritingInterface;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum MinimalExampleLangOperators {
@@ -44,9 +43,3 @@ impl fmt::Display for MinimalExampleTransformationKind {
     }
 }
 
-pub struct MinimalExampleInterface {}
-
-impl BarebonesTermRewritingInterface for MinimalExampleInterface {
-    type LanguageOperatorSymbol = MinimalExampleLangOperators;
-    type TransformationKind = MinimalExampleTransformationKind;
-}

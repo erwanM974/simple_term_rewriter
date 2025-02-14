@@ -14,37 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use std::hash::Hash;
 use std::marker::PhantomData;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
-use crate::core::interface::BarebonesTermRewritingInterface;
-use crate::process::context::RewriteContext;
-use crate::process::filter::elim::RewriteFilterEliminationKind;
-use crate::process::filter::filter::RewriteFilterCriterion;
-use crate::process::handling::handler::RewriteProcessHandler;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
+use crate::process::context::RewritingProcessContextAndParameterization;
+use crate::process::filtration::RewritingFiltrationResult;
+use crate::process::handler::RewriteProcessHandler;
 use crate::process::node::RewriteNodeKind;
-use crate::process::param::RewriteParameterization;
 use crate::process::priorities::RewritePriorities;
+use crate::process::state::RewritingProcessState;
 use crate::process::step::RewriteStepKind;
-use crate::process::verdict::global::RewriteGlobalVerdict;
-use crate::process::verdict::local::RewriteLocalVerdict;
 
 
-pub struct RewriteConfig<STRI : BarebonesTermRewritingInterface> {
-    phantom: PhantomData<STRI>
+pub struct RewriteConfig<LangOp: Clone + PartialEq + Eq + Hash> {
+    phantom: PhantomData<LangOp>
 }
 
-pub struct RewriteStaticLocalVerdictAnalysisProof{}
-
-impl<STRI : BarebonesTermRewritingInterface> AbstractProcessConfiguration for RewriteConfig<STRI> {
-    type Context = RewriteContext;
-    type Parameterization = RewriteParameterization<STRI>;
-    type NodeKind = RewriteNodeKind<STRI::LanguageOperatorSymbol>;
-    type StepKind = RewriteStepKind<STRI>;
-    type Priorities = RewritePriorities<STRI::TransformationKind>;
-    type FilterCriterion = RewriteFilterCriterion;
-    type FilterEliminationKind = RewriteFilterEliminationKind;
-    type LocalVerdict = RewriteLocalVerdict<STRI::LanguageOperatorSymbol>;
-    type StaticLocalVerdictAnalysisProof = RewriteStaticLocalVerdictAnalysisProof;
-    type GlobalVerdict = RewriteGlobalVerdict<STRI::LanguageOperatorSymbol>;
-    type ProcessHandler = RewriteProcessHandler;
+impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractProcessConfiguration for RewriteConfig<LangOp> {
+    type ContextAndParameterization = RewritingProcessContextAndParameterization<LangOp>;
+    // ***
+    type AlgorithmOperationHandler = RewriteProcessHandler;
+    // ***
+    type DomainSpecificNode = RewriteNodeKind<LangOp>;
+    type DomainSpecificStep = RewriteStepKind<LangOp>;
+    type Priorities = RewritePriorities;
+    // ***
+    type MutablePersistentState = RewritingProcessState<LangOp>;
+    // ***
+    type FiltrationResult = RewritingFiltrationResult;
 }

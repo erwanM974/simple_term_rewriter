@@ -19,8 +19,7 @@ limitations under the License.
 
 use std::hash::Hash;
 
-use graph_process_manager_core::manager::config::AbstractNodeKind;
-
+use graph_process_manager_core::process::config::AbstractNodeKind;
 
 
 use crate::core::term::LanguageTerm;
@@ -35,8 +34,9 @@ pub struct RewriteNodeKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Has
 impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteNodeKind<LanguageOperatorSymbol> {
     pub fn new(
         term : LanguageTerm<LanguageOperatorSymbol>,
-        rewrite_system_index : usize) -> Self {
-            Self { term, rewrite_system_index }
+        rewrite_system_index : usize
+    ) -> Self {
+        Self { term, rewrite_system_index }
     }
 }
 

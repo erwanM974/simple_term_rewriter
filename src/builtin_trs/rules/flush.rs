@@ -14,10 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use std::hash::Hash;
 
-
-use crate::builtin_trs::interface::BuiltinTermRewritingInterface;
 use crate::core::term::LanguageTerm;
+
+
+
+/**
+ Something that can check an operator is associative.
+ **/
+pub trait AssociativityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    fn is_binary_associative(&self, op : &LanguageOperatorSymbol) -> bool;
+}
 
 
 /**
@@ -27,13 +35,15 @@ use crate::core::term::LanguageTerm;
     op(op(x,y),z) -> op(x,op(y,z))
     i.e., it flushes the content to the right
  **/
-pub fn transformation_flush_to_the_right<STRI : BuiltinTermRewritingInterface>(
-        term : &LanguageTerm<STRI::LanguageOperatorSymbol>
-) -> Option<LanguageTerm<STRI::LanguageOperatorSymbol>> {
+pub(crate) fn transformation_flush_to_the_right<
+    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+>(
+    checker : &Box<dyn AssociativityChecker<LanguageOperatorSymbol>>,
+    term : &LanguageTerm<LanguageOperatorSymbol>
+) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
     let operator_at_root = &term.operator;
     // this must be applied to a binary associative operator
-    let precondition = (STRI::op_arity(operator_at_root) == 2)
-        && STRI::op_is_binary_associative(operator_at_root);
+    let precondition = checker.is_binary_associative(operator_at_root);
     if precondition {
         // given OP the operator
         // we have a term of the form t=OP(t1,t2)
@@ -79,13 +89,15 @@ This transformation performs:
 op(x,op(y,z)) -> op(op(x,y),z)
 i.e., it flushes the content to the left
  **/
-pub fn transformation_flush_to_the_left<STRI : BuiltinTermRewritingInterface>(
-    term : &LanguageTerm<STRI::LanguageOperatorSymbol>
-) -> Option<LanguageTerm<STRI::LanguageOperatorSymbol>> {
+pub(crate) fn transformation_flush_to_the_left<
+    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+>(
+    checker : &Box<dyn AssociativityChecker<LanguageOperatorSymbol>>,
+    term : &LanguageTerm<LanguageOperatorSymbol>
+) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
     let operator_at_root = &term.operator;
     // this must be applied to a binary associative operator
-    let precondition = (STRI::op_arity(operator_at_root) == 2)
-        && STRI::op_is_binary_associative(operator_at_root);
+    let precondition = checker.is_binary_associative(operator_at_root);
     if precondition {
         // given OP the operator
         // we have a term of the form t=OP(t1,t2)

@@ -15,10 +15,11 @@ limitations under the License.
 */
 
 
-pub mod interface;
-pub mod term;
-pub mod rule;
 pub mod apply;
+pub mod position;
+pub mod predicate;
+pub mod rule;
+pub mod term;
 
 
 

@@ -1,6 +1,6 @@
 [package]
 name = "simple_term_rewriter"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Erwan Mahe"]
 edition = "2021"
 
@@ -14,11 +14,11 @@ homepage = "https://github.com/erwanM974/simple_term_rewriter"
 keywords = ["term", "tree", "rewriting"]
 
 [dependencies]
-graphviz_dot_builder = "0.1.3"
-graph_process_manager_core = "0.1.10"
-graph_process_manager_loggers = "0.2.0"
+graphviz_dot_builder          = "0.1.5"
+graph_process_manager_core    = "0.2.1"
+graph_process_manager_loggers = "0.2.2"
 
-
+ 
 [dev-dependencies]
 ab_glyph           = "0.2.23"
 image              = "0.25.0"

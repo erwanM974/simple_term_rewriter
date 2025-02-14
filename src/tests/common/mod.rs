@@ -20,5 +20,7 @@ pub const DRAWING_GRAPHIC_FONT: &'static [u8] = include_bytes!("DejaVuSansMono.t
 pub const SCALE : f32 = 20.0;
 
 
+pub mod util;
+
 
 

@@ -15,7 +15,9 @@ limitations under the License.
 */
 
 
-use crate::core::{interface::BarebonesTermRewritingInterface, term::LanguageTerm};
+use std::hash::Hash;
+
+use super::term::LanguageTerm;
 
 
 
@@ -24,29 +26,24 @@ use crate::core::{interface::BarebonesTermRewritingInterface, term::LanguageTerm
 /** 
  * A rewrite rule that may be applied at the root position of a term.
  * **/
-pub trait RewriteRule<STRI : BarebonesTermRewritingInterface> : std::fmt::Display {
+pub trait RewriteRule<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
 
     /** 
-     * Returns an object that describes this rewrite rule.
+     * Returns a description this rewrite rule.
      * **/
-    fn get_transformation_kind(&self) -> STRI::TransformationKind;
+    fn get_desc(&self) -> String;
 
     /** 
      * If the rule is applicable at the root position of the given term, then it returns the result of its application.
      * **/
-    fn try_apply(&self, term : &LanguageTerm<STRI::LanguageOperatorSymbol>) -> Option<LanguageTerm<STRI::LanguageOperatorSymbol>>;
+    fn try_apply(
+        &self,
+        term : &LanguageTerm<LanguageOperatorSymbol>
+    ) -> Option<LanguageTerm<LanguageOperatorSymbol>>;
 
 }
 
 
-/** 
- * A predicate that may hold or not on terms of the language which we are considering.
- * **/
-pub trait PredicateOnTerm<STRI : BarebonesTermRewritingInterface> : std::fmt::Display {
-
-    fn term_satisfies(&self, term : &LanguageTerm<STRI::LanguageOperatorSymbol>) -> bool;
-
-}
 
 
 

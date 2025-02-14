@@ -17,32 +17,50 @@ limitations under the License.
 
 
 use std::cmp::Ordering;
-use crate::builtin_trs::interface::BuiltinTermRewritingInterface;
+use std::hash::Hash;
 use crate::core::term::LanguageTerm;
 
 
-
-
+/**
+ Something that can check two sub-terms may be commuted when under a given root.
+And that provide a total order on the language's operator symbols.
+ **/
+pub trait CommutativeCheckerAndOrderer<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    fn may_commute_under(
+        &self,
+        root_term : &LanguageTerm<LanguageOperatorSymbol>
+    ) -> bool;
+    fn compare_operators(
+        &self,
+        op1 : &LanguageOperatorSymbol,
+        op2 : &LanguageOperatorSymbol
+    ) -> std::cmp::Ordering;
+    fn get_arity(
+        &self,
+        op : &LanguageOperatorSymbol
+    ) -> usize;
+}
 
 
 /**
  Given a total order on the operator symbols, we derive a total order on the terms built using these operator symbols.
  **/
-fn compare_terms<STRI : BuiltinTermRewritingInterface>(
-        t1:&LanguageTerm<STRI::LanguageOperatorSymbol>,
-        t2:&LanguageTerm<STRI::LanguageOperatorSymbol>
+fn compare_terms<Lop : Clone + PartialEq + Eq + Hash>(
+    t1 : &LanguageTerm<Lop>,
+    t2 : &LanguageTerm<Lop>,
+    checker : &Box<dyn CommutativeCheckerAndOrderer<Lop>>
 ) -> std::cmp::Ordering {
-    match STRI::compare_operators(&t1.operator,&t2.operator) {
+    match checker.compare_operators(&t1.operator,&t2.operator) {
         Ordering::Less => {
             Ordering::Less
         },
         Ordering::Equal => {
-            let arity = STRI::op_arity(&t1.operator);
-            assert_eq!(arity, STRI::op_arity(&t2.operator));
+            let arity = checker.get_arity(&t1.operator);
+            assert_eq!(arity, checker.get_arity(&t2.operator));
             for i in 0..arity {
                 let sub_t1_at_i = t1.sub_terms.get(i).unwrap();
                 let sub_t2_at_i = t2.sub_terms.get(i).unwrap();
-                match compare_terms::<STRI>(sub_t1_at_i,sub_t2_at_i) {
+                match compare_terms::<Lop>(sub_t1_at_i,sub_t2_at_i, checker) {
                     Ordering::Less => {
                         return Ordering::Less;
                     }
@@ -69,18 +87,20 @@ If op is a binary commutative operator given a total order < on the concrete ter
 if we have x < y for any two terms then this transformation performs:
 op(y,x) -> op(x,y)
  **/
-pub fn transformation_reorder_subterms_under_commutative_operator<STRI : BuiltinTermRewritingInterface>(
-    term : &LanguageTerm<STRI::LanguageOperatorSymbol>
-) -> Option<LanguageTerm<STRI::LanguageOperatorSymbol>> {
-    let operator_at_root = &term.operator;
+pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
+    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+>(
+    checker : &Box<dyn CommutativeCheckerAndOrderer<LanguageOperatorSymbol>>,
+    term : &LanguageTerm<LanguageOperatorSymbol>
+) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
     // this must be applied to a binary commutative operator
-    let precondition = (STRI::op_arity(operator_at_root) == 2)
-        && STRI::op_is_binary_commutative(operator_at_root);
+    let precondition = checker.may_commute_under(term);
     // ***
     if precondition {
+        let operator_at_root = &term.operator;
         let left_sub_term = term.sub_terms.first().unwrap();
         let right_sub_term = term.sub_terms.get(1).unwrap();
-        match compare_terms::<STRI>(left_sub_term,right_sub_term) {
+        match compare_terms::<LanguageOperatorSymbol>(left_sub_term,right_sub_term, checker) {
             Ordering::Greater => {
                 // means that the left sub-term is greater than the right sub-term
                 // so se should switch

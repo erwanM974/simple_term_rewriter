@@ -15,18 +15,16 @@ limitations under the License.
 */
 
 
+
 use crate::core::{rule::RewriteRule, term::LanguageTerm};
 
-use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
+use super::lang::{MinimalExampleLangOperators, MinimalExampleTransformationKind};
 
 
 
 
 
-impl RewriteRule<MinimalExampleInterface> for MinimalExampleTransformationKind {
-    fn get_transformation_kind(&self) -> MinimalExampleTransformationKind {
-        self.clone()
-    }
+impl RewriteRule<MinimalExampleLangOperators> for MinimalExampleTransformationKind {
 
     fn try_apply(&self, term : &LanguageTerm<MinimalExampleLangOperators>) 
     -> Option<LanguageTerm<MinimalExampleLangOperators>> {
@@ -108,5 +106,9 @@ impl RewriteRule<MinimalExampleInterface> for MinimalExampleTransformationKind {
                 }
             },
         }
+    }
+    
+    fn get_desc(&self) -> String {
+        self.to_string()
     }
 }

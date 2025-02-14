@@ -14,32 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use crate::core::interface::*;
+use std::hash::Hash;
+use crate::core::position::*;
 use crate::core::rule::RewriteRule;
 use crate::core::term::LanguageTerm;
 
 
 /** 
- * The result of the application of a given rewrite rule at a given position
+ * The result of the application:
+ *   - of a given rewrite rule, unambiguously referred to via:
+ *     + the phase index
+ *     + the rule index in the phase
+ *   - at a given position in the term
  * **/
- pub struct TermTransformationResult<STRI : BarebonesTermRewritingInterface> {
-    pub kind : STRI::TransformationKind,
+ pub struct TermTransformationResult<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    pub phase_index : usize,
+    pub rule_index_in_phase : usize,
     pub position : PositionInLanguageTerm,
-    pub result : LanguageTerm<STRI::LanguageOperatorSymbol>
+    pub result : LanguageTerm<LanguageOperatorSymbol>
  }
 
  
-impl<STRI : BarebonesTermRewritingInterface>  TermTransformationResult<STRI> {
+impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>  TermTransformationResult<LanguageOperatorSymbol> {
     pub fn new(
-        kind : STRI::TransformationKind,
+        phase_index : usize,
+        rule_index_in_phase : usize,
         position : PositionInLanguageTerm,
-        result : LanguageTerm<STRI::LanguageOperatorSymbol>) -> Self {
-            Self{kind,position,result}
+        result : LanguageTerm<LanguageOperatorSymbol>) -> Self {
+        Self{
+            phase_index,
+            rule_index_in_phase,
+            position,
+            result
+        }
     }
     pub fn new_at_root(
-        kind : STRI::TransformationKind,
-        result : LanguageTerm<STRI::LanguageOperatorSymbol>) -> Self {
-            Self::new(kind, PositionInLanguageTerm::get_root_position(),result)
+        phase_index : usize,
+        rule_index_in_phase : usize,
+        result : LanguageTerm<LanguageOperatorSymbol>) -> Self {
+        Self::new(
+            phase_index,
+            rule_index_in_phase,
+            PositionInLanguageTerm::get_root_position(),
+            result
+        )
     }
 }
 
@@ -47,26 +65,33 @@ impl<STRI : BarebonesTermRewritingInterface>  TermTransformationResult<STRI> {
 
 
 
-pub fn get_transformations<STRI : BarebonesTermRewritingInterface>(
-    rewrite_rules : &Vec<Box<dyn RewriteRule<STRI>>>,
-    term : &LanguageTerm<STRI::LanguageOperatorSymbol>,
+pub fn get_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>(
+    phase_index : usize,
+    rewrite_rules : &Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
+    term : &LanguageTerm<LanguageOperatorSymbol>,
     keep_only_one : bool
 ) 
-        -> Vec<TermTransformationResult<STRI>> 
+        -> Vec<TermTransformationResult<LanguageOperatorSymbol>>
 {   
-    let mut results = get_root_transformations(rewrite_rules,term,keep_only_one);
-    if keep_only_one {
+    let mut results = get_root_transformations(
+        phase_index,
+        rewrite_rules,
+        term,
+        keep_only_one
+    );
+    if keep_only_one && !results.is_empty() {
         return results;
     }
     for (n,sub_term) in term.sub_terms.iter().enumerate() {
-        for sub_transfo in get_transformations::<STRI>(rewrite_rules, sub_term, keep_only_one) {
+        for sub_transfo in get_transformations::<LanguageOperatorSymbol>(phase_index,rewrite_rules, sub_term, keep_only_one) {
             let upd_pos = sub_transfo.position.position_as_nth_sub_term(n);
-            let mut upd_sub_terms : Vec<LanguageTerm<STRI::LanguageOperatorSymbol>> = term.sub_terms.clone();
+            let mut upd_sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>> = term.sub_terms.clone();
             upd_sub_terms.remove(n);
             upd_sub_terms.insert(n,sub_transfo.result);
             // ***
             let res = TermTransformationResult::new(
-                sub_transfo.kind,
+                sub_transfo.phase_index,
+                sub_transfo.rule_index_in_phase,
                 upd_pos,
                 LanguageTerm::new(term.operator.clone(), upd_sub_terms) 
             );
@@ -84,18 +109,18 @@ pub fn get_transformations<STRI : BarebonesTermRewritingInterface>(
 /**
   f
  **/
-fn get_root_transformations<STRI : BarebonesTermRewritingInterface>(
-    rewrite_rules : &Vec<Box<dyn RewriteRule<STRI>>>,
-    term : &LanguageTerm<STRI::LanguageOperatorSymbol>,
+fn get_root_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>(
+    phase_index : usize,
+    rewrite_rules : &Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
+    term : &LanguageTerm<LanguageOperatorSymbol>,
     keep_only_one : bool
-) 
-        -> Vec<TermTransformationResult<STRI>> 
+) -> Vec<TermTransformationResult<LanguageOperatorSymbol>>
 {   
     let mut results = vec![];
-    for rule in rewrite_rules {
+    for (rule_index,rule) in rewrite_rules.iter().enumerate() {
         if let Some(result) = rule.try_apply(term) {
             results.push(
-                TermTransformationResult::new_at_root(rule.get_transformation_kind(), result)
+                TermTransformationResult::new_at_root(phase_index,rule_index,result)
             );
             if keep_only_one {
                 return results;

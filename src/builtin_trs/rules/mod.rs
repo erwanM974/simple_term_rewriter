@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod binary_idempotence;
-pub mod defactorize;
+
 pub mod factorize;
 pub mod flush;
+pub mod modulo_associative_flattened_transfo;
 pub mod reorder_commute;
-pub mod simpl_neutral_elements;
-pub mod unary_composition;
+pub mod simpl_binary;
+pub mod simpl_unary;

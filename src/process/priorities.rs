@@ -17,12 +17,10 @@ limitations under the License.
 
 
 use std::hash::Hash;
-use std::{collections::HashMap, fmt};
-use graph_process_manager_core::delegate::priorities::AbstractPriorities;
+use std::collections::HashMap;
+use graph_process_manager_core::queue::priorities::AbstractPriorities;
 
-use crate::core::interface::BarebonesTermRewritingInterface;
-
-use crate::process::step::RewriteStepKind;
+use super::step::RewriteStepKind;
 
 
 
@@ -37,51 +35,64 @@ use crate::process::step::RewriteStepKind;
  * - If it has a value lower than zero, applying the rule closer to the root is prefered
  * - If it has a valye greater than zero, applying the rule deeper in the term is preferred
  * **/
-pub struct RewritePriorities<TransformationKind : Clone + PartialEq + Eq + Hash> {
-    pub transfo_kind_priorities : HashMap<TransformationKind,i32>,
-    pub depth_modifiers : HashMap<TransformationKind,i32>,
+pub struct RewritePriorities {
+    // at each phase,
+    pub rewrite_rules_priorities : HashMap<usize,HashMap<usize,i32>>,
+    // at each phase, either innermost or outermost
+    pub depth_modifiers : HashMap<usize,i32>,
+    // priority of the special rule to go to the next phase
     pub next_phase_priority : i32 
 }
 
-impl<TransformationKind : Clone + PartialEq + Eq + Hash> std::default::Default for RewritePriorities<TransformationKind> {
+
+
+impl RewritePriorities {
+    pub fn new(rewrite_rules_priorities: HashMap<usize, HashMap<usize, i32>>, depth_modifiers: HashMap<usize, i32>, next_phase_priority: i32) -> Self {
+        Self { rewrite_rules_priorities, depth_modifiers, next_phase_priority }
+    }
+}
+
+impl std::default::Default for RewritePriorities {
     fn default() -> Self {
-        RewritePriorities::new(HashMap::new(), HashMap::new(), 1)
+        RewritePriorities::new(
+            HashMap::new(),
+            HashMap::new(),
+            1
+        )
     }
 }
 
-impl<TransformationKind : Clone + PartialEq + Eq + Hash> RewritePriorities<TransformationKind> {
 
-    pub fn new(
-        transfo_kind_priorities : HashMap<TransformationKind,i32>, 
-        depth_modifiers : HashMap<TransformationKind,i32>, 
-        next_phase_priority : i32
-    ) -> Self {
-        RewritePriorities{transfo_kind_priorities,depth_modifiers,next_phase_priority}
-    }
 
-}
-
-impl<TransformationKind : Clone + PartialEq + Eq + Hash> fmt::Display for RewritePriorities<TransformationKind> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO : properly print the priorities
-        write!(f,"[]")
-    }
-}
-
-impl<STRI : BarebonesTermRewritingInterface> AbstractPriorities<RewriteStepKind<STRI>> for RewritePriorities<STRI::TransformationKind>{
-    fn get_priority_of_step(&self, step: &RewriteStepKind<STRI>) -> i32 {
+impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractPriorities<RewriteStepKind<LangOp>> for RewritePriorities {
+    fn get_priority_of_step(
+        &self,
+        step: &RewriteStepKind<LangOp>
+    ) -> i32 {
         match step {
             RewriteStepKind::Transform(transfo) => {
                 let mut score = 0;
-                if let Some(kind_priority) = self.transfo_kind_priorities.get(&transfo.kind) {
-                    score += kind_priority;
+                if let Some(phase_priorities) = self.rewrite_rules_priorities.get(
+                    &transfo.phase_index
+                ) {
+                    if let Some(rule_priority) = phase_priorities.get(
+                        &transfo.rule_index_in_phase
+                    ) {
+                        score += rule_priority;
+                    }
+                }
+                if let Some(depth_modifier) = self.depth_modifiers.get(
+                    &transfo.phase_index
+                ) {
+                    score+=(transfo.position.get_depth() as i32) *depth_modifier;
                 }
                 score
             },
-            RewriteStepKind::GoToNextPhase => {
+            RewriteStepKind::GoToPhase(_) => {
                 self.next_phase_priority
             } 
         }
     }
+
 }
 

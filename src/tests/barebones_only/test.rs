@@ -15,16 +15,14 @@ limitations under the License.
 */
 
 
-use std::path::PathBuf;
-
-use graph_process_manager_core::{delegate::priorities::GenericProcessPriorities, queued_steps::queue::strategy::QueueSearchStrategy};
-use graph_process_manager_loggers::graphviz::{format::GraphVizProcessLoggerLayout, logger::GenericGraphVizLogger};
+use graph_process_manager_core::{process::{filter::GenericFiltersManager, manager::GenericProcessManager}, queue::{priorities::GenericProcessPriorities, strategy::QueueSearchStrategy}};
+use graph_process_manager_loggers::graphviz::{format::GraphVizProcessLoggerLayout, logger::{GenericGraphVizLogger, GenericGraphVizLoggerConfiguration}};
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
-use crate::{core::{rule::RewriteRule, term::LanguageTerm}, process::{conf::RewriteConfig, param::RewriteParameterization, priorities::RewritePriorities}, process_interface::rewrite_term};
-use crate::tests::barebones_only::glog::drawer::MinimalRewritingProcessDrawer;
+use crate::{core::term::LanguageTerm, process::{conf::RewriteConfig, context::{RewritingProcessContextAndParameterization, RewritingProcessPhase}, node::RewriteNodeKind, priorities::RewritePriorities}, tests::barebones_only::glog::{all_the_rest_drawer::MinimalRewritingStepDrawer, legend_writer::MinimalLegendWriter, node_drawer::MinimalRewritingNodeDrawer}};
 
-use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators, MinimalExampleTransformationKind};
+
+use super::lang::{MinimalExampleLangOperators, MinimalExampleTransformationKind};
 
 
 pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
@@ -79,36 +77,54 @@ pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
 #[test]
 pub fn test() {
 
-
-    let res_buf : PathBuf = [".", "res"].iter().collect();
-    let temp_buf : PathBuf = [".", "temp"].iter().collect();
-
     let term = get_term_1();
-    let phase : Vec<Box<dyn RewriteRule<MinimalExampleInterface>>> = vec![
-        Box::new(MinimalExampleTransformationKind::DoubleNegation),
-        Box::new(MinimalExampleTransformationKind::EvaluateNeg),
-        Box::new(MinimalExampleTransformationKind::EvaluateAnd),
-        Box::new(MinimalExampleTransformationKind::EvaluateOr),
-    ];
-    let param = RewriteParameterization::new(
-vec![phase],
-false
+    let phase = RewritingProcessPhase::new(
+        vec![
+            Box::new(MinimalExampleTransformationKind::DoubleNegation),
+            Box::new(MinimalExampleTransformationKind::EvaluateNeg),
+            Box::new(MinimalExampleTransformationKind::EvaluateAnd),
+            Box::new(MinimalExampleTransformationKind::EvaluateOr),
+        ],
+        None, 
+        false
     );
-    let drawer = MinimalRewritingProcessDrawer::new(temp_buf.into_os_string().into_string().unwrap());
-    let graphviz_logger : GenericGraphVizLogger<RewriteConfig<MinimalExampleInterface>> = GenericGraphVizLogger::new(
-        Box::new(drawer),
-        GraphVizOutputFormat::svg,
-        GraphVizProcessLoggerLayout::Vertical,
-        true,
-        res_buf.clone().into_os_string().into_string().unwrap(),
-        format!("rewrite"));
-    let result = rewrite_term::<MinimalExampleInterface>(
-        &term,
-        QueueSearchStrategy::BFS,
+    let context_and_param = RewritingProcessContextAndParameterization::new(vec![phase]);
+    let graphviz_logger : GenericGraphVizLogger<RewriteConfig<MinimalExampleLangOperators>> = {
+        let gv_conf = GenericGraphVizLoggerConfiguration::new(
+            GraphVizOutputFormat::svg, 
+            true, 
+            "temp".to_string(), 
+            "".to_string(), 
+            "barebones".to_string()
+        );
+        GenericGraphVizLogger::new(
+            gv_conf,
+            Box::new(MinimalLegendWriter{}),
+            vec![Box::new(MinimalRewritingNodeDrawer{})],
+            Box::new(MinimalRewritingStepDrawer::new()),
+            GraphVizProcessLoggerLayout::Vertical
+        )
+    };
+
+    // ***
+
+    let mut manager : GenericProcessManager<RewriteConfig<MinimalExampleLangOperators>> = GenericProcessManager::new(
+        context_and_param,
+        QueueSearchStrategy::DFS,
         GenericProcessPriorities::new(RewritePriorities::default(),false),
-        param,
-        vec![],
-        vec![Box::new(graphviz_logger)]
+        GenericFiltersManager::new(
+            vec![], 
+            vec![], 
+            vec![]
+        ),
+        vec![Box::new(graphviz_logger)],
+        true
     );
+
+    manager.start_process(RewriteNodeKind::new(term.clone(),0));
+
+    let x = manager.global_state.irreducible_terms_per_phase.get(&0).unwrap();
+    let result = x.first().unwrap();
+    
     assert_eq!(result.operator, MinimalExampleLangOperators::TRUE);
 }

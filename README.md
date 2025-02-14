@@ -4,6 +4,7 @@ I initially wrote this code for this project: [hibou](https://github.com/erwanM9
 
 Since then it has evolved a bit and I decided to repackage it on its own as a library.
 
+
 This does not claim to be a fully fledged Term Rewriting Library.
 By that I mean that:
 - only concrete terms are intended to be handled (i.e., in the term structure, there are only concrete terms, and no placeholders for "unknown" subterms)
@@ -13,6 +14,8 @@ By that I mean that:
     - terminate if and only if you memoize all encountered terms. In that case, this means you have at least one cycle of rewrite operations.
     - not terminate at all, even if you memoize (trivially, if you have a rule like `c -> F(c)`)
   - if you provide a set of rules that is non confluent, and if you generate the rewrite graph of a concrete term (memoizing encountered terms), there may not be a unique irreducible term in that graph.
+
+
 
 ## Barebones interface
 
@@ -50,7 +53,7 @@ To check that, you should use a dedicated tool (it is not handled here).
 
 ## Builtin extended interface
 
-TODO
+TODO 
 
 ### Examples using the extended interface
 

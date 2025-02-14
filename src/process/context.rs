@@ -16,10 +16,33 @@ limitations under the License.
 
 
 
-pub struct RewriteContext {}
+use std::hash::Hash;
+use crate::core::rule::RewriteRule;
 
-impl RewriteContext {
-    pub fn new() -> Self {
-        Self { }
+
+pub struct RewritingProcessPhase<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    pub rules : Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
+    pub goto_at_end : Option<usize>,
+    pub keep_only_one : bool
+}
+
+impl<LanguageOperatorSymbol: Clone + PartialEq + Eq + Hash> RewritingProcessPhase<LanguageOperatorSymbol> {
+    pub fn new(
+        rules: Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>, 
+        goto_at_end : Option<usize>,
+        keep_only_one: bool
+    ) -> Self {
+        Self { rules, goto_at_end, keep_only_one }
     }
 }
+
+pub struct RewritingProcessContextAndParameterization<LangOp : Clone + PartialEq + Eq + Hash> {
+    pub phases : Vec<RewritingProcessPhase<LangOp>>
+}
+
+impl<LangOp: Clone + PartialEq + Eq + Hash> RewritingProcessContextAndParameterization<LangOp> {
+    pub fn new(phases: Vec<RewritingProcessPhase<LangOp>>) -> Self {
+        Self { phases }
+    }
+}
+

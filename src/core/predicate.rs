@@ -15,20 +15,20 @@ limitations under the License.
 */
 
 
-use std::hash::Hash;
-use std::fmt;
 
+use std::hash::Hash;
 use crate::core::term::LanguageTerm;
 
-pub struct RewriteLocalVerdict<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub got_term : LanguageTerm<LanguageOperatorSymbol>
-}
+/**
+  * A predicate that may hold or not on terms of the language which we are considering.
+ * **/
+pub trait PredicateOnTerm<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    /**
+      * Returns a description this predicate.
+     * **/
+    fn get_desc(&self) -> String;
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> fmt::Display for RewriteLocalVerdict<LanguageOperatorSymbol> {
-
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"")
-    }
+    fn term_satisfies(&self, term : &LanguageTerm<LanguageOperatorSymbol>) -> bool;
 
 }
 

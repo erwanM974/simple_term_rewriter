@@ -16,15 +16,15 @@ limitations under the License.
 
 
 use std::path::{Path, PathBuf};
+use graph_process_manager_loggers::graphviz::drawers::node_drawer::CustomNodeDrawerForGraphvizLogger;
+use graph_process_manager_loggers::graphviz::item::BuiltinGraphvizLoggerItemStyle;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem};
-use graph_process_manager_loggers::graphviz::builtin::node_drawer::CustomNodeDrawerForGraphvizLogger;
 
 use crate::draw_term::{draw_term_tree_with_graphviz, TermDrawingContext};
 use crate::process::conf::RewriteConfig;
-use crate::process::context::RewriteContext;
+use crate::process::context::RewritingProcessContextAndParameterization;
 use crate::process::node::RewriteNodeKind;
-use crate::process::param::RewriteParameterization;
-use crate::tests::barebones_only::lang::{MinimalExampleInterface, MinimalExampleLangOperators};
+use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
 
 
 
@@ -41,13 +41,14 @@ impl TermDrawingContext<MinimalExampleLangOperators> for MinimalRewritingNodeDra
     }
 }
 
-impl CustomNodeDrawerForGraphvizLogger<RewriteConfig<MinimalExampleInterface>> for MinimalRewritingNodeDrawer {
+impl CustomNodeDrawerForGraphvizLogger<RewriteConfig<MinimalExampleLangOperators>> for MinimalRewritingNodeDrawer {
 
-    fn draw(&self,
-            node : &RewriteNodeKind<MinimalExampleLangOperators>,
-            _context: &RewriteContext,
-            _parameterization: &RewriteParameterization<MinimalExampleInterface>,
-            full_path : &Path) {
+    fn get_node_node_inner_style_and_draw_if_needed(
+        &self,
+        _context_and_param : &RewritingProcessContextAndParameterization<MinimalExampleLangOperators>,
+        node : &RewriteNodeKind<MinimalExampleLangOperators>,
+        full_path : &Path
+    ) -> BuiltinGraphvizLoggerItemStyle {
         // ***
         let temp_file_name = "temp.dot";
         let temp_path : PathBuf = [&temp_file_name].iter().collect();
@@ -55,6 +56,7 @@ impl CustomNodeDrawerForGraphvizLogger<RewriteConfig<MinimalExampleInterface>> f
         draw_term_tree_with_graphviz::<MinimalExampleLangOperators,MinimalRewritingNodeDrawer>(
             self,&node.term,&temp_path.as_path(),full_path
         );
+        BuiltinGraphvizLoggerItemStyle::CustomImage
     }
 
 }

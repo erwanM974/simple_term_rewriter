@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use crate::core::{apply::TermTransformationResult, interface::BarebonesTermRewritingInterface};
+use std::hash::Hash;
+use crate::core::apply::TermTransformationResult;
 
 
 
 
-pub enum RewriteStepKind<STRI : BarebonesTermRewritingInterface> {
-    Transform(TermTransformationResult<STRI>),
-    GoToNextPhase
+pub enum RewriteStepKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    Transform(TermTransformationResult<LanguageOperatorSymbol>),
+    GoToPhase(usize)
 }
 
 

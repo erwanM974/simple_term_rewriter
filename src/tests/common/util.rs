@@ -24,7 +24,6 @@ use image_colored_text::draw::multi_line::draw_multiline_colored_text;
 use imageproc::drawing::draw_filled_rect_mut;
 use imageproc::rect::Rect;
 
-use crate::tests::barebones_only::glog::step_drawer::MY_COLOR_WHITE;
 
 
 
@@ -46,7 +45,7 @@ pub fn new_image_with_colored_text(path : &Path,
     // ***
     draw_filled_rect_mut(&mut image,
                          Rect::at(0,0).of_size(img_width as u32,img_height as u32),
-                         Rgb(MY_COLOR_WHITE));
+                         Rgb([255u8,  255u8,  255u8]));
     // Draw content text
     draw_multiline_colored_text(&mut image,
                                 &DrawCoord::StartingAt(margin),

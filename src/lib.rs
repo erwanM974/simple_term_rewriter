@@ -15,12 +15,12 @@ limitations under the License.
 */
 
 
-pub mod core;
-pub mod process;
-pub mod process_interface;
-pub mod draw_term;
 
 pub mod builtin_trs;
+pub mod core;
+pub mod process;
+pub mod draw_term;
+
 
 
 #[cfg(test)]

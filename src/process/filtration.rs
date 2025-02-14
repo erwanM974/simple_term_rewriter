@@ -18,27 +18,23 @@ limitations under the License.
 
 use std::fmt;
 
-pub enum RewriteFilterEliminationKind {
-    DoesNotSatisfiesPredicate,
-    ExceededNumberOfApplicationsOfASpecificRule,
-    MaxProcessDepth,
+pub enum RewritingFiltrationResult {
+    PredicateUnsat(String),
     MaxNodeNumber
 }
 
-impl fmt::Display for RewriteFilterEliminationKind {
+impl fmt::Display for RewritingFiltrationResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RewriteFilterEliminationKind::DoesNotSatisfiesPredicate => {
-                write!(f,"DoesNotSatisfiesPredicate")
+            RewritingFiltrationResult::PredicateUnsat(pred_desc) => {
+                if pred_desc.is_empty() {
+                    write!(f,"PredicateUnsat")
+                } else {
+                    write!(f,"PredicateUnsat_{}", pred_desc)
+                }
             },
-            RewriteFilterEliminationKind::ExceededNumberOfApplicationsOfASpecificRule => {
-                write!(f,"ExceededNumberOfApplicationsOfASpecificRule")
-            }
-            RewriteFilterEliminationKind::MaxProcessDepth => {
-                write!(f,"MaxDepth")
-            },
-            RewriteFilterEliminationKind::MaxNodeNumber => {
-                write!(f,"MaxNum")
+            RewritingFiltrationResult::MaxNodeNumber => {
+                write!(f,"MaxNodeNumber")
             }
         }
     }

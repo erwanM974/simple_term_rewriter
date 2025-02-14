@@ -27,7 +27,7 @@ use graphviz_dot_builder::item::node::node::GraphVizNode;
 use graphviz_dot_builder::item::node::style::GraphvizNodeStyle;
 use graphviz_dot_builder::traits::DotBuildable;
 
-use crate::core::interface::PositionInLanguageTerm;
+use crate::core::position::PositionInLanguageTerm;
 use crate::core::term::LanguageTerm;
 
 

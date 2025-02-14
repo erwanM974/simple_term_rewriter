@@ -15,5 +15,4 @@ limitations under the License.
 */
 
 
-pub mod elim;
-pub mod filter;
+pub mod legend_writer_utils;
