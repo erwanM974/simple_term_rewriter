@@ -33,6 +33,13 @@ use crate::core::term::LanguageTerm;
   This trait corresponds to something that will:
   - given a specific associative operator, compute that vector (if possible)
   - and perform a specific transformation on that vector (if possible)
+
+  With the above example, we have transformations such as:
+  a + b + a + c + b + d -> a + b + c + d
+
+  We also give the possibility of restricting that to subterms under a specific parent unary operator.
+  For instance, to perform transformations such as:
+  ( a* + b + c* + d )* -> ( a + b + c + d )*
  **/
  pub trait ModuloAssociativeFlattenedChecker<LangOp : Clone + PartialEq + Eq + Hash> {
 
@@ -40,12 +47,31 @@ use crate::core::term::LanguageTerm;
         &self, 
         op : &LangOp
     ) -> bool;
+
+    /** 
+     * Returns None if the transformation does not involve a unary operator at the root.
+     * Returns Some(true) if it involves one and we have found one such operator at the root.
+     * Returns Some(false) if it involves one but we have not found one such operator at the root.
+     * **/
+    fn if_required_is_a_parent_unary_operator_we_may_consider(
+        &self,
+        op : &LangOp
+    ) -> Option<bool>;
     
+    /** 
+     * Transforms a term of the form:
+     * - either Y(X(z_1,...,z_n)) where Y is unary and X is binary associative
+     * - or X(z_1,...,z_n) where X is binary associative
+     * The return value consists of:
+     * - Option<&LangOp> in the first case, we may change Y to Y' (including the identify if None) 
+     * - Vec<LanguageTerm<LangOp> in both cases, which correspond to the z'_1,...z'_m which substitute the z_1,...,z_n
+     * **/
     fn transform_flattened_sub_terms(
         &self, 
         considered_ac_op : &LangOp, 
+        considered_parent_op : Option<&LangOp>,
         flattened_subterms : Vec<&LanguageTerm<LangOp>>
-    ) -> Option<Vec<LanguageTerm<LangOp>>>;
+    ) -> Option<(Option<LangOp>,Vec<LanguageTerm<LangOp>>)>;
 
 }
 
@@ -110,20 +136,53 @@ pub(crate) fn transformation_modulo_associative_flattened_transfo<
     checker : &Box<dyn ModuloAssociativeFlattenedChecker<LanguageOperatorSymbol>>,
     term : &LanguageTerm<LanguageOperatorSymbol>
 ) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
-    if checker.is_an_associative_binary_operator_we_may_consider(&term.operator) {
-        let considered_associative_operator = &term.operator;
-        let flattened_sub_terms = get_associative_sub_terms_recursively(term, considered_associative_operator);
-        checker.transform_flattened_sub_terms(
-            considered_associative_operator, 
-            flattened_sub_terms
-        ).map(
-            |mut transformed_flattened| 
-            fold_associative_sub_terms_recursively(
-                considered_associative_operator,
-                &mut transformed_flattened
-            )
-        )
-    } else {
-        None
+
+    let (unary_op,ac_root) = match checker.if_required_is_a_parent_unary_operator_we_may_consider(&term.operator) {
+        None => {
+            // the transformation does not involve a parent unary operator
+            // so the binary AC operator we might consider is at the root of the term
+            (None,Some(term)) 
+        },
+        Some(unary_is_considered) => {
+            if unary_is_considered {
+                (Some(&term.operator),Some(term.sub_terms.first().unwrap()))
+            } else {
+                (None,None)
+            }
+        }
+    };
+
+    if let Some(ac_root_term) = ac_root {
+        if checker.is_an_associative_binary_operator_we_may_consider(&ac_root_term.operator) {
+            let considered_associative_operator = &ac_root_term.operator;
+            let flattened_sub_terms = get_associative_sub_terms_recursively(
+                ac_root_term, 
+                considered_associative_operator
+            );
+            if let Some( (new_parent,mut transformed_flattened) ) = checker.transform_flattened_sub_terms(
+                considered_associative_operator, 
+                unary_op,
+                flattened_sub_terms
+            ) {
+                let folded_transformed = fold_associative_sub_terms_recursively(
+                    considered_associative_operator,
+                    &mut transformed_flattened
+                );
+                let got = match new_parent {
+                    None => {
+                       folded_transformed
+                    },
+                    Some(new_parent_op) => {
+                        LanguageTerm::new(
+                            new_parent_op, 
+                            vec![folded_transformed]
+                        )
+                    }
+                };
+                return Some(got);
+            }
+        }
     }
+    // ***
+    None
 }

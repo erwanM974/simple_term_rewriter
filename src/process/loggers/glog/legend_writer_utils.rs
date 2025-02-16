@@ -39,10 +39,6 @@ pub fn get_rewrite_parameters_description<LangOp : Clone + PartialEq + Eq + Hash
         }
         param_desc.push("  ];".to_string());
         // ***
-        if let Some(target_phase) = &phase.goto_at_end {
-            param_desc.push(format!("  goto_at_end = {:};", target_phase));
-        }
-        // ***
         param_desc.push(format!("  keep_only_one = {:};", phase.keep_only_one));
         // ***
         param_desc.push("]".to_string());

@@ -85,7 +85,6 @@ pub fn test() {
             Box::new(MinimalExampleTransformationKind::EvaluateAnd),
             Box::new(MinimalExampleTransformationKind::EvaluateOr),
         ],
-        None, 
         false
     );
     let context_and_param = RewritingProcessContextAndParameterization::new(vec![phase]);

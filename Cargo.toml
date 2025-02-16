@@ -1,6 +1,6 @@
 [package]
 name = "simple_term_rewriter"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Erwan Mahe"]
 edition = "2021"
 
@@ -16,7 +16,7 @@ keywords = ["term", "tree", "rewriting"]
 [dependencies]
 graphviz_dot_builder          = "0.1.5"
 graph_process_manager_core    = "0.2.1"
-graph_process_manager_loggers = "0.2.2"
+graph_process_manager_loggers = "0.2.3"
 
  
 [dev-dependencies]

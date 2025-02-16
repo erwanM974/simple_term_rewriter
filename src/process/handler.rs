@@ -66,15 +66,16 @@ impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractAlgorithmOperationHandler<Re
                     phase.keep_only_one
                 );
                 if transfos.is_empty() {
-                    match phase.goto_at_end {
-                        Some(target_phase_id) => {
-                            vec![RewriteStepKind::GoToPhase(target_phase_id)]
-                        },
-                        None => {
-                            vec![]
-                        },
+                    // the term is irreducible
+                    if parent_node.rewrite_system_index < context_and_param.phases.len() - 1 {
+                        // there remains at least another phase after
+                        vec![RewriteStepKind::GoToPhase(parent_node.rewrite_system_index + 1)]
+                    } else {
+                        // the last phase is over (the term is irreducible in the last phase)
+                        vec![]
                     }
                 } else {
+                    // the term is not irreducible, some rewrite rules can be applied
                     transfos.into_iter()
                         .map(|r|
                             RewriteStepKind::Transform(r)

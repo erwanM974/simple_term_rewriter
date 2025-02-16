@@ -17,7 +17,7 @@ limitations under the License.
 use std::path::Path;
 use ab_glyph::FontRef;
 use graph_process_manager_loggers::graphviz::drawers::all_the_rest_drawer::CustomAllTheRestDrawerForGraphvizLogger;
-use graph_process_manager_loggers::graphviz::item::BuiltinGraphvizLoggerItemStyle;
+use graph_process_manager_loggers::graphviz::item::{BuiltinGraphvizLoggerDefaultGvItemStyle, BuiltinGraphvizLoggerItemStyle};
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::item::node::style::GvNodeShape;
 use image::Rgb;
@@ -106,13 +106,16 @@ impl CustomAllTheRestDrawerForGraphvizLogger<RewriteConfig<MinimalExampleLangOpe
         filtration_result: &RewritingFiltrationResult,
         _image_file_path : &Path
     ) -> BuiltinGraphvizLoggerItemStyle {
-        BuiltinGraphvizLoggerItemStyle::ShapeAndLabel(
-            GvNodeShape::Rectangle, 
-            filtration_result.to_string(), 
-            GraphvizColor::red, 
-            18, 
-            "Arial", 
-            GraphvizColor::wheat
+        BuiltinGraphvizLoggerItemStyle::Default(
+            BuiltinGraphvizLoggerDefaultGvItemStyle::new(
+                GvNodeShape::Rectangle,
+                filtration_result.to_string(), 
+                18, 
+                None,
+                GraphvizColor::red, 
+                GraphvizColor::red, 
+                GraphvizColor::wheat
+            )
         )
     }
     
