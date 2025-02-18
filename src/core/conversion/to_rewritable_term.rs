@@ -29,7 +29,7 @@ pub trait FromDomainSpecificTermToRewritableTerm<LanguageOperatorSymbol : Clone 
     /** 
      * Returns the sub-terms of the domain specific term.
      * **/
-     fn get_subterms<'a>(&'a self) -> Vec<&'a Self>;
+     fn get_subterms(&self) -> Vec<&Self>;
 
     /** 
      * Conversion from the domain specific (outside of this crate) term language to this crate's rewritable term language.

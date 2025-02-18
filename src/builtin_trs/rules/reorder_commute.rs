@@ -15,9 +15,8 @@ limitations under the License.
 */
 
 
-
-use std::cmp::Ordering;
 use std::hash::Hash;
+use crate::builtin_trs::util::is_greater_as_per_lexicographic_path_ordering;
 use crate::core::term::LanguageTerm;
 
 
@@ -26,9 +25,15 @@ use crate::core::term::LanguageTerm;
 And that provide a total order on the language's operator symbols.
  **/
 pub trait CommutativeCheckerAndOrderer<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+    fn is_a_binary_operator_we_may_consider(
+        &self,
+        op : &LanguageOperatorSymbol
+    ) -> bool;
     fn may_commute_under(
         &self,
-        root_term : &LanguageTerm<LanguageOperatorSymbol>
+        parent_op :&LanguageOperatorSymbol,
+        left_sub_term : &LanguageTerm<LanguageOperatorSymbol>,
+        right_sub_term : &LanguageTerm<LanguageOperatorSymbol>,
     ) -> bool;
     fn compare_operators(
         &self,
@@ -39,46 +44,14 @@ pub trait CommutativeCheckerAndOrderer<LanguageOperatorSymbol : Clone + PartialE
         &self,
         op : &LanguageOperatorSymbol
     ) -> usize;
+    fn is_associative(
+        &self,
+        op : &LanguageOperatorSymbol
+    ) -> bool;
 }
 
 
-/**
- Given a total order on the operator symbols, we derive a total order on the terms built using these operator symbols.
- **/
-fn compare_terms<Lop : Clone + PartialEq + Eq + Hash>(
-    t1 : &LanguageTerm<Lop>,
-    t2 : &LanguageTerm<Lop>,
-    checker : &Box<dyn CommutativeCheckerAndOrderer<Lop>>
-) -> std::cmp::Ordering {
-    match checker.compare_operators(&t1.operator,&t2.operator) {
-        Ordering::Less => {
-            Ordering::Less
-        },
-        Ordering::Equal => {
-            let arity = checker.get_arity(&t1.operator);
-            assert_eq!(arity, checker.get_arity(&t2.operator));
-            for i in 0..arity {
-                let sub_t1_at_i = t1.sub_terms.get(i).unwrap();
-                let sub_t2_at_i = t2.sub_terms.get(i).unwrap();
-                match compare_terms::<Lop>(sub_t1_at_i,sub_t2_at_i, checker) {
-                    Ordering::Less => {
-                        return Ordering::Less;
-                    }
-                    Ordering::Greater => {
-                        return Ordering::Greater;
-                    }
-                    Ordering::Equal => {
-                        // do nothing
-                    }
-                }
-            }
-            Ordering::Equal
-        },
-        Ordering::Greater => {
-            Ordering::Greater
-        }
-    }
-}
+
 
 
 
@@ -86,6 +59,11 @@ fn compare_terms<Lop : Clone + PartialEq + Eq + Hash>(
 If op is a binary commutative operator given a total order < on the concrete terms,
 if we have x < y for any two terms then this transformation performs:
 op(y,x) -> op(x,y)
+
+If op is also associative, then we may also perform:
+op(y,op(x,_)) -> op(x,op(y,_))
+and 
+op(op(_,y),x) -> op(op(_,x),y)
  **/
 pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
     LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
@@ -93,33 +71,107 @@ pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
     checker : &Box<dyn CommutativeCheckerAndOrderer<LanguageOperatorSymbol>>,
     term : &LanguageTerm<LanguageOperatorSymbol>
 ) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    if !checker.is_a_binary_operator_we_may_consider(&term.operator) {
+        return None;
+    }
+    //
+    let considered_op = &term.operator;
+    // we have a term of the form "op(t1,t2)"
+    let left_sub_term = term.sub_terms.first().unwrap();
+    let right_sub_term = term.sub_terms.get(1).unwrap();
     // this must be applied to a binary commutative operator
-    let precondition = checker.may_commute_under(term);
+    if checker.may_commute_under(
+        considered_op, 
+        left_sub_term, 
+        right_sub_term
+    ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+        left_sub_term,
+        right_sub_term, 
+        &|x,y| checker.compare_operators(x,y),
+        &|x| checker.get_arity(x),
+    ) {
+        // we may commute t1 and t2 and we have that t1 > t2 so we do so:
+        // and return "op(t2,t1)"
+        let new_term = LanguageTerm::new(
+            considered_op.clone(),
+            vec![
+                right_sub_term.clone(),
+                left_sub_term.clone()
+            ]
+        );
+        return Some(new_term);
+    }
     // ***
-    if precondition {
-        let operator_at_root = &term.operator;
-        let left_sub_term = term.sub_terms.first().unwrap();
-        let right_sub_term = term.sub_terms.get(1).unwrap();
-        match compare_terms::<LanguageOperatorSymbol>(left_sub_term,right_sub_term, checker) {
-            Ordering::Greater => {
-                // means that the left sub-term is greater than the right sub-term
-                // so se should switch
+    if checker.is_associative(considered_op) {
+        // if the operator is also associative, we may consider 
+        // op(y,op(x,_)) -> op(x,op(y,_))
+        // and op(op(_,y),x) -> op(op(_,x),y)
+        if &right_sub_term.operator == considered_op {
+           // we have a term of the form op(t1,op(t21,t22))
+            let t21 = right_sub_term.sub_terms.first().unwrap();
+            let t22 = right_sub_term.sub_terms.get(1).unwrap();
+            if checker.may_commute_under(
+                considered_op, 
+                left_sub_term, 
+                t21
+            ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+                left_sub_term,
+                t21, 
+                &|x,y| checker.compare_operators(x,y),
+                &|x| checker.get_arity(x),
+            ) {
+                // we may commute t1 and t21 and we have that t1 > t21 so we do so:
+                // and return "op(t21,op(t1,y22))"
                 let new_term = LanguageTerm::new(
-                    operator_at_root.clone(),
+                    considered_op.clone(),
                     vec![
-                        right_sub_term.clone(),
-                        left_sub_term.clone()
+                        t21.clone(),
+                        LanguageTerm::new(
+                            considered_op.clone(),
+                            vec![
+                                left_sub_term.clone(),
+                                t22.clone()
+                            ]
+                        )
                     ]
                 );
-                Some(new_term)
-            },
-            _ => {
-                // means that the left sub-term is either equal or lower than the right
-                // so the order in the term is already the good order
-                None
+                return Some(new_term);
             }
         }
-    } else {
-        None
+        // ***
+        if &left_sub_term.operator == considered_op {
+            // we have a term of the form op(op(t11,t12),t2)
+             let t11 = left_sub_term.sub_terms.first().unwrap();
+             let t12 = left_sub_term.sub_terms.get(1).unwrap();
+             if checker.may_commute_under(
+                 considered_op, 
+                 t12, 
+                 right_sub_term
+             ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+                t12,
+                 right_sub_term, 
+                 &|x,y| checker.compare_operators(x,y),
+                 &|x| checker.get_arity(x),
+             ) {
+                 // we may commute t12 and t2 and we have that t12 > t2 so we do so:
+                 // and return "op(op(t11,t2),t12)"
+                 let new_term = LanguageTerm::new(
+                     considered_op.clone(),
+                     vec![
+                         LanguageTerm::new(
+                             considered_op.clone(),
+                             vec![
+                                t11.clone(),
+                                right_sub_term.clone()
+                             ]
+                         ),
+                         t12.clone()
+                     ]
+                 );
+                 return Some(new_term);
+             }
+         }
+        // ***
     }
+    None 
 }

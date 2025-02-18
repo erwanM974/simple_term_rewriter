@@ -62,6 +62,7 @@ use crate::core::term::LanguageTerm;
      * Transforms a term of the form:
      * - either Y(X(z_1,...,z_n)) where Y is unary and X is binary associative
      * - or X(z_1,...,z_n) where X is binary associative
+     * 
      * The return value consists of:
      * - Option<&LangOp> in the first case, we may change Y to Y' (including the identify if None) 
      * - Vec<LanguageTerm<LangOp> in both cases, which correspond to the z'_1,...z'_m which substitute the z_1,...,z_n
