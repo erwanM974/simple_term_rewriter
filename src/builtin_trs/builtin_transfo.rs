@@ -15,10 +15,9 @@ limitations under the License.
 */
 
 
-use std::hash::Hash;
 
 use crate::core::rule::RewriteRule;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 use crate::builtin_trs::rules::factorize::{DistributivityChecker, transformation_defactorize_left_distributive, transformation_defactorize_right_distributive, transformation_factorize_left_distributive, transformation_factorize_right_distributive};
 use crate::builtin_trs::rules::flush::{AssociativityChecker, transformation_flush_to_the_left, transformation_flush_to_the_right};
@@ -28,54 +27,54 @@ use crate::builtin_trs::rules::simpl_unary::{GenericUnaryOperatorSimplifier, tra
 use crate::builtin_trs::rules::modulo_associative_flattened_transfo::{ModuloAssociativeFlattenedChecker, transformation_modulo_associative_flattened_transfo};
 
 
-pub enum BuiltinRewriteTransformationKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol> {
     // ***
     /// refer to [transformation_flush_to_the_right](transformation_flush_to_the_right)
-    AssociativeFlushRight(Box<dyn AssociativityChecker<LanguageOperatorSymbol>>),
+    AssociativeFlushRight(Box<dyn AssociativityChecker<LOS>>),
     // ***
     /// refer to [transformation_flush_to_the_left](transformation_flush_to_the_left)
-    AssociativeFlushLeft(Box<dyn AssociativityChecker<LanguageOperatorSymbol>>),
+    AssociativeFlushLeft(Box<dyn AssociativityChecker<LOS>>),
     // ***
     /// refer to [transformation_reorder_subterms_under_commutative_operator](transformation_reorder_subterms_under_commutative_operator)
-    ReorderOperandsIfCommutative(Box<dyn CommutativeCheckerAndOrderer<LanguageOperatorSymbol>>),
+    ReorderOperandsIfCommutative(Box<dyn CommutativeCheckerAndOrderer<LOS>>),
     // ***
     /// refer to [transformation_generic_simpl_under_unary_operator](transformation_generic_simpl_under_unary_operator)
-    GenericSimplifyUnderUnary(Box<dyn GenericUnaryOperatorSimplifier<LanguageOperatorSymbol>>),
+    GenericSimplifyUnderUnary(Box<dyn GenericUnaryOperatorSimplifier<LOS>>),
     // ***
     /// refer to [transformation_generic_simpl_under_binary_operator](transformation_generic_simpl_under_binary_operator)
-    GenericSimplifyUnderBinary(Box<dyn GenericBinaryOperatorSimplifier<LanguageOperatorSymbol>>),
+    GenericSimplifyUnderBinary(Box<dyn GenericBinaryOperatorSimplifier<LOS>>),
     // ***
     /// refer to [transformation_factorize_left_distributive](transformation_factorize_left_distributive)
-    FactorizeLeftDistributive(Box<dyn DistributivityChecker<LanguageOperatorSymbol>>),
+    FactorizeLeftDistributive(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_factorize_right_distributive](transformation_factorize_right_distributive)
-    FactorizeRightDistributive(Box<dyn DistributivityChecker<LanguageOperatorSymbol>>),
+    FactorizeRightDistributive(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_defactorize_left_distributive](transformation_defactorize_left_distributive)
-    DeFactorizeLeftDistributive(Box<dyn DistributivityChecker<LanguageOperatorSymbol>>),
+    DeFactorizeLeftDistributive(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_defactorize_right_distributive](transformation_defactorize_right_distributive)
-    DeFactorizeRightDistributive(Box<dyn DistributivityChecker<LanguageOperatorSymbol>>),
+    DeFactorizeRightDistributive(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_modulo_associative_flattened_transfo](transformation_modulo_associative_flattened_transfo)
-    ModuloAssociativeFlattenedTransfo(Box<dyn ModuloAssociativeFlattenedChecker<LanguageOperatorSymbol>>)
+    ModuloAssociativeFlattenedTransfo(Box<dyn ModuloAssociativeFlattenedChecker<LOS>>)
 }
 
 
-pub struct BuiltinRewriteTransformation<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub kind : BuiltinRewriteTransformationKind<LanguageOperatorSymbol>,
+pub struct BuiltinRewriteTransformation<LOS : RewritableLanguageOperatorSymbol> {
+    pub kind : BuiltinRewriteTransformationKind<LOS>,
     pub desc : String
 }
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<LanguageOperatorSymbol> for BuiltinRewriteTransformation<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewriteTransformation<LOS> {
     fn get_desc(&self) -> String {
         self.desc.clone()
     }
 
     fn try_apply(&self,
-                 term : &LanguageTerm<LanguageOperatorSymbol>
-    ) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+                 term : &LanguageTerm<LOS>
+    ) -> Option<LanguageTerm<LOS>> {
         match &self.kind {
             BuiltinRewriteTransformationKind::AssociativeFlushRight(
                 rule_application_checker
             ) => {
-                transformation_flush_to_the_right::<LanguageOperatorSymbol>(
+                transformation_flush_to_the_right::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -83,7 +82,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::AssociativeFlushLeft(
                 rule_application_checker
             ) => {
-                transformation_flush_to_the_left::<LanguageOperatorSymbol>(
+                transformation_flush_to_the_left::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -91,7 +90,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::ReorderOperandsIfCommutative(
                 rule_application_checker
             ) => {
-                transformation_reorder_subterms_under_commutative_operator::<LanguageOperatorSymbol>(
+                transformation_reorder_subterms_under_commutative_operator::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -99,7 +98,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::GenericSimplifyUnderUnary(
                 rule_application_checker
             ) => {
-                transformation_generic_simpl_under_unary_operator::<LanguageOperatorSymbol>(
+                transformation_generic_simpl_under_unary_operator::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -107,7 +106,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::GenericSimplifyUnderBinary(
                 rule_application_checker
             ) => {
-                transformation_generic_simpl_under_binary_operator::<LanguageOperatorSymbol>(
+                transformation_generic_simpl_under_binary_operator::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -115,7 +114,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::FactorizeLeftDistributive(
                 rule_application_checker
             ) => {
-                transformation_factorize_left_distributive::<LanguageOperatorSymbol>(
+                transformation_factorize_left_distributive::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -123,7 +122,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::DeFactorizeLeftDistributive(
                 rule_application_checker
             ) => {
-                transformation_defactorize_left_distributive::<LanguageOperatorSymbol>(
+                transformation_defactorize_left_distributive::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -131,7 +130,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::FactorizeRightDistributive(
                 rule_application_checker
             ) => {
-                transformation_factorize_right_distributive::<LanguageOperatorSymbol>(
+                transformation_factorize_right_distributive::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -139,7 +138,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::DeFactorizeRightDistributive(
                 rule_application_checker
             ) => {
-                transformation_defactorize_right_distributive::<LanguageOperatorSymbol>(
+                transformation_defactorize_right_distributive::<LOS>(
                     rule_application_checker,
                     term
                 )
@@ -147,7 +146,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteRule<Languag
             BuiltinRewriteTransformationKind::ModuloAssociativeFlattenedTransfo(
                 rule_application_checker
             ) => {
-                transformation_modulo_associative_flattened_transfo::<LanguageOperatorSymbol>(
+                transformation_modulo_associative_flattened_transfo::<LOS>(
                     rule_application_checker,
                     term
                 )

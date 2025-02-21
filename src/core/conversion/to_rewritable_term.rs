@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
-pub trait FromDomainSpecificTermToRewritableTerm<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> : Sized + Clone {
+pub trait FromDomainSpecificTermToRewritableTerm<LOS : RewritableLanguageOperatorSymbol> : Sized + Clone {
 
     /** 
      * Returns the operator at the root of the domain specific term.
      * **/
-    fn get_operator_at_root(&self) -> LanguageOperatorSymbol;
+    fn get_operator_at_root(&self) -> LOS;
 
     /** 
      * Returns the sub-terms of the domain specific term.
@@ -34,7 +33,7 @@ pub trait FromDomainSpecificTermToRewritableTerm<LanguageOperatorSymbol : Clone 
     /** 
      * Conversion from the domain specific (outside of this crate) term language to this crate's rewritable term language.
      * **/
-     fn to_rewritable_term(&self) -> LanguageTerm<LanguageOperatorSymbol> {
+     fn to_rewritable_term(&self) -> LanguageTerm<LOS> {
         let mut sub_terms = vec![];
         for domain_specific_sub_term in self.get_subterms() {
             sub_terms.push(

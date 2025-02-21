@@ -16,30 +16,29 @@ limitations under the License.
 
 
 
-use std::hash::Hash;
-use crate::core::rule::RewriteRule;
+use crate::core::{rule::RewriteRule, term::RewritableLanguageOperatorSymbol};
 
 
-pub struct RewritingProcessPhase<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub rules : Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
+pub struct RewritingProcessPhase<LOS : RewritableLanguageOperatorSymbol> {
+    pub rules : Vec<Box<dyn RewriteRule<LOS>>>,
     pub keep_only_one : bool
 }
 
-impl<LanguageOperatorSymbol: Clone + PartialEq + Eq + Hash> RewritingProcessPhase<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessPhase<LOS> {
     pub fn new(
-        rules: Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>, 
+        rules: Vec<Box<dyn RewriteRule<LOS>>>, 
         keep_only_one: bool
     ) -> Self {
         Self { rules, keep_only_one }
     }
 }
 
-pub struct RewritingProcessContextAndParameterization<LangOp : Clone + PartialEq + Eq + Hash> {
-    pub phases : Vec<RewritingProcessPhase<LangOp>>
+pub struct RewritingProcessContextAndParameterization<LOS : RewritableLanguageOperatorSymbol> {
+    pub phases : Vec<RewritingProcessPhase<LOS>>
 }
 
-impl<LangOp: Clone + PartialEq + Eq + Hash> RewritingProcessContextAndParameterization<LangOp> {
-    pub fn new(phases: Vec<RewritingProcessPhase<LangOp>>) -> Self {
+impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessContextAndParameterization<LOS> {
+    pub fn new(phases: Vec<RewritingProcessPhase<LOS>>) -> Self {
         Self { phases }
     }
 }

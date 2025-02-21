@@ -15,10 +15,10 @@ limitations under the License.
 */
 
 
-
-use std::hash::Hash;
 use std::collections::HashMap;
 use graph_process_manager_core::queue::priorities::AbstractPriorities;
+
+use crate::core::term::RewritableLanguageOperatorSymbol;
 
 use super::step::RewriteStepKind;
 
@@ -64,10 +64,10 @@ impl std::default::Default for RewritePriorities {
 
 
 
-impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractPriorities<RewriteStepKind<LangOp>> for RewritePriorities {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractPriorities<RewriteStepKind<LOS>> for RewritePriorities {
     fn get_priority_of_step(
         &self,
-        step: &RewriteStepKind<LangOp>
+        step: &RewriteStepKind<LOS>
     ) -> i32 {
         match step {
             RewriteStepKind::Transform(transfo) => {

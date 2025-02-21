@@ -15,9 +15,8 @@ limitations under the License.
 */
 
 
-
-use std::hash::Hash;
 use graph_process_manager_core::process::handler::AbstractAlgorithmOperationHandler;
+use crate::core::term::RewritableLanguageOperatorSymbol;
 use crate::process::conf::RewriteConfig;
 use crate::process::node::RewriteNodeKind;
 use crate::process::step::RewriteStepKind;
@@ -27,13 +26,13 @@ use crate::process::context::RewritingProcessContextAndParameterization;
 
 pub struct RewriteProcessHandler {}
 
-impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractAlgorithmOperationHandler<RewriteConfig<LangOp>> for RewriteProcessHandler {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractAlgorithmOperationHandler<RewriteConfig<LOS>> for RewriteProcessHandler {
 
     fn process_new_step(
-        _context_and_param : &RewritingProcessContextAndParameterization<LangOp>,
-        parent_node : &RewriteNodeKind<LangOp>,
-        step_to_process : &RewriteStepKind<LangOp>
-    ) -> RewriteNodeKind<LangOp> {
+        _context_and_param : &RewritingProcessContextAndParameterization<LOS>,
+        parent_node : &RewriteNodeKind<LOS>,
+        step_to_process : &RewriteStepKind<LOS>
+    ) -> RewriteNodeKind<LOS> {
         match step_to_process {
             RewriteStepKind::GoToPhase(phase_id) => {
                 RewriteNodeKind::new(
@@ -51,9 +50,9 @@ impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractAlgorithmOperationHandler<Re
     }
 
     fn collect_next_steps(
-        context_and_param : &RewritingProcessContextAndParameterization<LangOp>,
-        parent_node : &RewriteNodeKind<LangOp>
-    ) -> Vec<RewriteStepKind<LangOp>> {
+        context_and_param : &RewritingProcessContextAndParameterization<LOS>,
+        parent_node : &RewriteNodeKind<LOS>
+    ) -> Vec<RewriteStepKind<LOS>> {
         match context_and_param.phases.get(parent_node.rewrite_system_index) {
             None => {
                 vec![]

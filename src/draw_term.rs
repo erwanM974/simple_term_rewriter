@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -28,15 +27,15 @@ use graphviz_dot_builder::item::node::style::GraphvizNodeStyle;
 use graphviz_dot_builder::traits::DotBuildable;
 
 use crate::core::position::PositionInLanguageTerm;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
-pub trait TermDrawingContext<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub trait TermDrawingContext<LOS : RewritableLanguageOperatorSymbol> {
 
     fn get_operator_representation_as_graphviz_node_style(
         &self, 
-        operator : &LanguageOperatorSymbol
+        operator : &LOS
     ) -> GraphvizNodeStyle;
 
 }
@@ -44,18 +43,18 @@ pub trait TermDrawingContext<LanguageOperatorSymbol : Clone + PartialEq + Eq + H
 
 
 pub fn draw_term_tree_with_graphviz<
-        Op : Clone + PartialEq + Eq + Hash, 
-        TDC : TermDrawingContext<Op>
+        LOS : RewritableLanguageOperatorSymbol,
+        TDC : TermDrawingContext<LOS>
 >(
     tdc : &TDC,
-    term : &LanguageTerm<Op>,
+    term : &LanguageTerm<LOS>,
     temp_file_path : &Path,
     output_file_path : &Path,
 ) 
 {
     // ***
     let mut temp_file = File::create(temp_file_path).unwrap();
-    let _ = temp_file.write( term_gv_repr::<Op,TDC>(tdc,term).to_dot_string().as_bytes() );
+    let _ = temp_file.write( term_gv_repr::<LOS,TDC>(tdc,term).to_dot_string().as_bytes() );
     // ***
     let _ = Command::new("dot")
         .arg("-Tpng")
@@ -67,24 +66,24 @@ pub fn draw_term_tree_with_graphviz<
 
 
 pub fn term_gv_repr<
-Op : Clone + PartialEq + Eq + Hash, 
-TDC : TermDrawingContext<Op>
+LOS : RewritableLanguageOperatorSymbol,
+TDC : TermDrawingContext<LOS>
 >(
     tdc : &TDC,
-    term : &LanguageTerm<Op>) -> GraphVizDiGraph 
+    term : &LanguageTerm<LOS>) -> GraphVizDiGraph 
 {
     let mut digraph = GraphVizDiGraph::new(vec![]);
-    term_gv_repr_rec::<Op,TDC>(tdc,term,PositionInLanguageTerm::get_root_position(), &mut digraph);
+    term_gv_repr_rec::<LOS,TDC>(tdc,term,PositionInLanguageTerm::get_root_position(), &mut digraph);
     digraph
 }
 
 
 fn term_gv_repr_rec<
-Op : Clone + PartialEq + Eq + Hash, 
-TDC : TermDrawingContext<Op>
+LOS : RewritableLanguageOperatorSymbol,
+TDC : TermDrawingContext<LOS>
 >(
     tdc : &TDC,
-    term : &LanguageTerm<Op>,
+    term : &LanguageTerm<LOS>,
     current_pos : PositionInLanguageTerm,
     gv_graph : &mut GraphVizDiGraph) -> String 
 {

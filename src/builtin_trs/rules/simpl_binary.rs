@@ -15,14 +15,12 @@ limitations under the License.
 */
 
 
-
-use std::hash::Hash;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
-pub trait GenericBinaryOperatorSimplifier<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    fn is_binary(&self, op : &LanguageOperatorSymbol) -> bool;
+pub trait GenericBinaryOperatorSimplifier<LOS : RewritableLanguageOperatorSymbol> {
+    fn is_binary(&self, op : &LOS) -> bool;
     /**
      Try to simplify a term which root is a binary operator.
     This can be used to:
@@ -44,19 +42,19 @@ pub trait GenericBinaryOperatorSimplifier<LanguageOperatorSymbol : Clone + Parti
      **/
     fn try_simplify_under_binary_operator(
         &self,
-        top_operator : &LanguageOperatorSymbol,
-        left : &LanguageTerm<LanguageOperatorSymbol>,
-        right : &LanguageTerm<LanguageOperatorSymbol>,
-    ) -> Option<LanguageTerm<LanguageOperatorSymbol>>;
+        top_operator : &LOS,
+        left : &LanguageTerm<LOS>,
+        right : &LanguageTerm<LOS>,
+    ) -> Option<LanguageTerm<LOS>>;
 }
 
 
 pub(crate) fn transformation_generic_simpl_under_binary_operator<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn GenericBinaryOperatorSimplifier<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn GenericBinaryOperatorSimplifier<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
     let operator_at_root = &term.operator;
     // this must be applied to a binary operator
     let precondition = checker.is_binary(operator_at_root);

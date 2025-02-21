@@ -17,23 +17,25 @@ limitations under the License.
 
 
 use std::hash::Hash;
+use std::fmt::Debug;
 
+pub trait RewritableLanguageOperatorSymbol : Clone + PartialEq + Eq + Hash + Debug + 'static {}
 
 
 
 /** 
  * A concrete term in the Language which we are considering.
  * **/
- #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct LanguageTerm<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub operator : LanguageOperatorSymbol,
-    pub sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>>
+ #[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct LanguageTerm<LOS : RewritableLanguageOperatorSymbol> {
+    pub operator : LOS,
+    pub sub_terms : Vec<LanguageTerm<LOS>>
 }
 
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> LanguageTerm<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol> LanguageTerm<LOS> {
 
-    pub fn new(operator : LanguageOperatorSymbol,sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>>) -> Self {
+    pub fn new(operator : LOS,sub_terms : Vec<LanguageTerm<LOS>>) -> Self {
         Self{operator,sub_terms}
     }
 

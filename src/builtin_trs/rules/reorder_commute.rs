@@ -15,38 +15,37 @@ limitations under the License.
 */
 
 
-use std::hash::Hash;
 use crate::builtin_trs::util::is_greater_as_per_lexicographic_path_ordering;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 /**
  Something that can check two sub-terms may be commuted when under a given root.
 And that provide a total order on the language's operator symbols.
  **/
-pub trait CommutativeCheckerAndOrderer<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub trait CommutativeCheckerAndOrderer<LOS : RewritableLanguageOperatorSymbol> {
     fn is_a_binary_operator_we_may_consider(
         &self,
-        op : &LanguageOperatorSymbol
+        op : &LOS
     ) -> bool;
     fn may_commute_under(
         &self,
-        parent_op :&LanguageOperatorSymbol,
-        left_sub_term : &LanguageTerm<LanguageOperatorSymbol>,
-        right_sub_term : &LanguageTerm<LanguageOperatorSymbol>,
+        parent_op :&LOS,
+        left_sub_term : &LanguageTerm<LOS>,
+        right_sub_term : &LanguageTerm<LOS>,
     ) -> bool;
     fn compare_operators(
         &self,
-        op1 : &LanguageOperatorSymbol,
-        op2 : &LanguageOperatorSymbol
+        op1 : &LOS,
+        op2 : &LOS
     ) -> std::cmp::Ordering;
     fn get_arity(
         &self,
-        op : &LanguageOperatorSymbol
+        op : &LOS
     ) -> usize;
     fn is_associative(
         &self,
-        op : &LanguageOperatorSymbol
+        op : &LOS
     ) -> bool;
 }
 
@@ -66,11 +65,11 @@ and
 op(op(_,y),x) -> op(op(_,x),y)
  **/
 pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn CommutativeCheckerAndOrderer<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn CommutativeCheckerAndOrderer<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
     if !checker.is_a_binary_operator_we_may_consider(&term.operator) {
         return None;
     }
@@ -84,7 +83,7 @@ pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
         considered_op, 
         left_sub_term, 
         right_sub_term
-    ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+    ) && is_greater_as_per_lexicographic_path_ordering::<LOS>(
         left_sub_term,
         right_sub_term, 
         &|x,y| checker.compare_operators(x,y),
@@ -114,7 +113,7 @@ pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
                 considered_op, 
                 left_sub_term, 
                 t21
-            ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+            ) && is_greater_as_per_lexicographic_path_ordering::<LOS>(
                 left_sub_term,
                 t21, 
                 &|x,y| checker.compare_operators(x,y),
@@ -147,7 +146,7 @@ pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
                  considered_op, 
                  t12, 
                  right_sub_term
-             ) && is_greater_as_per_lexicographic_path_ordering::<LanguageOperatorSymbol>(
+             ) && is_greater_as_per_lexicographic_path_ordering::<LOS>(
                 t12,
                  right_sub_term, 
                  &|x,y| checker.compare_operators(x,y),

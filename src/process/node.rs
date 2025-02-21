@@ -22,18 +22,18 @@ use std::hash::Hash;
 use graph_process_manager_core::process::config::AbstractNodeKind;
 
 
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct RewriteNodeKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    pub term : LanguageTerm<LanguageOperatorSymbol>,
+pub struct RewriteNodeKind<LOS : RewritableLanguageOperatorSymbol> {
+    pub term : LanguageTerm<LOS>,
     pub rewrite_system_index : usize
 }
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteNodeKind<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol> RewriteNodeKind<LOS> {
     pub fn new(
-        term : LanguageTerm<LanguageOperatorSymbol>,
+        term : LanguageTerm<LOS>,
         rewrite_system_index : usize
     ) -> Self {
         Self { term, rewrite_system_index }
@@ -41,7 +41,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> RewriteNodeKind<Lan
 }
 
 
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> AbstractNodeKind for RewriteNodeKind<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractNodeKind for RewriteNodeKind<LOS> {
     fn is_included_for_memoization(&self, memoized_node: &Self) -> bool {
         self.term == memoized_node.term && self.rewrite_system_index == memoized_node.rewrite_system_index
     }

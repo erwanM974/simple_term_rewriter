@@ -15,16 +15,14 @@ limitations under the License.
 */
 
 
-
-use std::hash::Hash;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 /**
  Something that can simplify a term which root is a unary operator.
  **/
-pub trait GenericUnaryOperatorSimplifier<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    fn is_unary(&self, op : &LanguageOperatorSymbol) -> bool;
+pub trait GenericUnaryOperatorSimplifier<LOS : RewritableLanguageOperatorSymbol> {
+    fn is_unary(&self, op : &LOS) -> bool;
 
     /**
      Try to simplify a term which root is a unary operator.
@@ -44,9 +42,9 @@ pub trait GenericUnaryOperatorSimplifier<LanguageOperatorSymbol : Clone + Partia
      **/
     fn try_simplify_under_unary_operator(
         &self,
-        top_operator : &LanguageOperatorSymbol,
-        term_underneath : &LanguageTerm<LanguageOperatorSymbol>
-    ) -> Option<LanguageTerm<LanguageOperatorSymbol>>;
+        top_operator : &LOS,
+        term_underneath : &LanguageTerm<LOS>
+    ) -> Option<LanguageTerm<LOS>>;
 }
 
 
@@ -79,11 +77,11 @@ pub trait GenericUnaryOperatorSimplifier<LanguageOperatorSymbol : Clone + Partia
  * - for any real x, 1^x = 1
  **/
 pub(crate) fn transformation_generic_simpl_under_unary_operator<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn GenericUnaryOperatorSimplifier<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn GenericUnaryOperatorSimplifier<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
     let operator_at_root = &term.operator;
 
     if checker.is_unary(operator_at_root) {

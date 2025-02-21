@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
-use crate::core::apply::TermTransformationResult;
+
+
+use crate::core::{apply::TermTransformationResult, term::RewritableLanguageOperatorSymbol};
 
 
 
 
-pub enum RewriteStepKind<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    Transform(TermTransformationResult<LanguageOperatorSymbol>),
+pub enum RewriteStepKind<LOS : RewritableLanguageOperatorSymbol> {
+    Transform(TermTransformationResult<LOS>),
     GoToPhase(usize)
 }
 

@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 use std::marker::PhantomData;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
+use crate::core::term::RewritableLanguageOperatorSymbol;
 use crate::process::context::RewritingProcessContextAndParameterization;
 use crate::process::filtration::RewritingFiltrationResult;
 use crate::process::handler::RewriteProcessHandler;
@@ -26,20 +26,20 @@ use crate::process::state::RewritingProcessState;
 use crate::process::step::RewriteStepKind;
 
 
-pub struct RewriteConfig<LangOp: Clone + PartialEq + Eq + Hash> {
-    phantom: PhantomData<LangOp>
+pub struct RewriteConfig<LOS : RewritableLanguageOperatorSymbol> {
+    phantom: PhantomData<LOS>
 }
 
-impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractProcessConfiguration for RewriteConfig<LangOp> {
-    type ContextAndParameterization = RewritingProcessContextAndParameterization<LangOp>;
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractProcessConfiguration for RewriteConfig<LOS> {
+    type ContextAndParameterization = RewritingProcessContextAndParameterization<LOS>;
     // ***
     type AlgorithmOperationHandler = RewriteProcessHandler;
     // ***
-    type DomainSpecificNode = RewriteNodeKind<LangOp>;
-    type DomainSpecificStep = RewriteStepKind<LangOp>;
+    type DomainSpecificNode = RewriteNodeKind<LOS>;
+    type DomainSpecificStep = RewriteStepKind<LOS>;
     type Priorities = RewritePriorities;
     // ***
-    type MutablePersistentState = RewritingProcessState<LangOp>;
+    type MutablePersistentState = RewritingProcessState<LOS>;
     // ***
     type FiltrationResult = RewritingFiltrationResult;
 }

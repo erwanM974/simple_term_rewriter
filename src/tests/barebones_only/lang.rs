@@ -17,6 +17,8 @@ limitations under the License.
 
 use std::fmt;
 
+use crate::core::term::RewritableLanguageOperatorSymbol;
+
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum MinimalExampleLangOperators {
@@ -26,6 +28,8 @@ pub enum MinimalExampleLangOperators {
     AND,
     NEG 
 }
+
+impl RewritableLanguageOperatorSymbol for MinimalExampleLangOperators {}
 
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]

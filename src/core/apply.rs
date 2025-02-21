@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
+
 use crate::core::position::*;
 use crate::core::rule::RewriteRule;
 use crate::core::term::LanguageTerm;
+
+use super::term::RewritableLanguageOperatorSymbol;
 
 
 /** 
@@ -27,20 +29,20 @@ use crate::core::term::LanguageTerm;
  *     + the rule index in the phase
  *   - at a given position in the term
  * **/
- pub struct TermTransformationResult<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+ pub struct TermTransformationResult<LOS : RewritableLanguageOperatorSymbol> {
     pub phase_index : usize,
     pub rule_index_in_phase : usize,
     pub position : PositionInLanguageTerm,
-    pub result : LanguageTerm<LanguageOperatorSymbol>
+    pub result : LanguageTerm<LOS>
  }
 
  
-impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>  TermTransformationResult<LanguageOperatorSymbol> {
+impl<LOS : RewritableLanguageOperatorSymbol>  TermTransformationResult<LOS> {
     pub fn new(
         phase_index : usize,
         rule_index_in_phase : usize,
         position : PositionInLanguageTerm,
-        result : LanguageTerm<LanguageOperatorSymbol>) -> Self {
+        result : LanguageTerm<LOS>) -> Self {
         Self{
             phase_index,
             rule_index_in_phase,
@@ -51,7 +53,7 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>  TermTransformation
     pub fn new_at_root(
         phase_index : usize,
         rule_index_in_phase : usize,
-        result : LanguageTerm<LanguageOperatorSymbol>) -> Self {
+        result : LanguageTerm<LOS>) -> Self {
         Self::new(
             phase_index,
             rule_index_in_phase,
@@ -65,13 +67,13 @@ impl<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>  TermTransformation
 
 
 
-pub fn get_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>(
+pub fn get_transformations<LOS : RewritableLanguageOperatorSymbol>(
     phase_index : usize,
-    rewrite_rules : &Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>,
+    rewrite_rules : &Vec<Box<dyn RewriteRule<LOS>>>,
+    term : &LanguageTerm<LOS>,
     keep_only_one : bool
 ) 
-        -> Vec<TermTransformationResult<LanguageOperatorSymbol>>
+        -> Vec<TermTransformationResult<LOS>>
 {   
     let mut results = get_root_transformations(
         phase_index,
@@ -83,9 +85,9 @@ pub fn get_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Has
         return results;
     }
     for (n,sub_term) in term.sub_terms.iter().enumerate() {
-        for sub_transfo in get_transformations::<LanguageOperatorSymbol>(phase_index,rewrite_rules, sub_term, keep_only_one) {
+        for sub_transfo in get_transformations::<LOS>(phase_index,rewrite_rules, sub_term, keep_only_one) {
             let upd_pos = sub_transfo.position.position_as_nth_sub_term(n);
-            let mut upd_sub_terms : Vec<LanguageTerm<LanguageOperatorSymbol>> = term.sub_terms.clone();
+            let mut upd_sub_terms : Vec<LanguageTerm<LOS>> = term.sub_terms.clone();
             upd_sub_terms.remove(n);
             upd_sub_terms.insert(n,sub_transfo.result);
             // ***
@@ -109,12 +111,12 @@ pub fn get_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Has
 /**
   f
  **/
-fn get_root_transformations<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash>(
+fn get_root_transformations<LOS : RewritableLanguageOperatorSymbol>(
     phase_index : usize,
-    rewrite_rules : &Vec<Box<dyn RewriteRule<LanguageOperatorSymbol>>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>,
+    rewrite_rules : &Vec<Box<dyn RewriteRule<LOS>>>,
+    term : &LanguageTerm<LOS>,
     keep_only_one : bool
-) -> Vec<TermTransformationResult<LanguageOperatorSymbol>>
+) -> Vec<TermTransformationResult<LOS>>
 {   
     let mut results = vec![];
     for (rule_index,rule) in rewrite_rules.iter().enumerate() {

@@ -16,19 +16,20 @@ limitations under the License.
 
 
 
-use std::hash::Hash;
 use crate::core::term::LanguageTerm;
+
+use super::term::RewritableLanguageOperatorSymbol;
 
 /**
   * A predicate that may hold or not on terms of the language which we are considering.
  * **/
-pub trait PredicateOnTerm<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub trait PredicateOnTerm<LOS : RewritableLanguageOperatorSymbol> {
     /**
       * Returns a description this predicate.
      * **/
     fn get_desc(&self) -> String;
 
-    fn term_satisfies(&self, term : &LanguageTerm<LanguageOperatorSymbol>) -> bool;
+    fn term_satisfies(&self, term : &LanguageTerm<LOS>) -> bool;
 
 }
 

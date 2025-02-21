@@ -14,21 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 use std::cmp::Ordering;
 
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+
+
+
+
 
 
 
 /**
  Given a total order on the operator symbols, we derive a total order on the terms built using these operator symbols.
  **/
-pub fn is_greater_as_per_lexicographic_path_ordering<Lop : Clone + PartialEq + Eq + Hash>(
-    s : &LanguageTerm<Lop>,
-    t : &LanguageTerm<Lop>,
-    compare_operators : &dyn Fn(&Lop,&Lop) -> Ordering,
-    get_arity : &dyn Fn(&Lop) -> usize
+pub fn is_greater_as_per_lexicographic_path_ordering<LOS : RewritableLanguageOperatorSymbol>(
+    s : &LanguageTerm<LOS>,
+    t : &LanguageTerm<LOS>,
+    compare_operators : &dyn Fn(&LOS,&LOS) -> Ordering,
+    get_arity : &dyn Fn(&LOS) -> usize
 ) -> bool {
     match compare_operators(&s.operator,&t.operator) {
         Ordering::Greater => {
@@ -64,6 +67,9 @@ pub fn is_greater_as_per_lexicographic_path_ordering<Lop : Clone + PartialEq + E
                 let ti = t.sub_terms.get(i).unwrap();
                 if is_greater_as_per_lexicographic_path_ordering(si, ti,compare_operators,get_arity) {
                     return true;
+                }
+                if is_greater_as_per_lexicographic_path_ordering(ti, si,compare_operators,get_arity) {
+                    return false;
                 }
             }
         },

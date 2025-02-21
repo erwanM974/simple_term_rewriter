@@ -16,10 +16,9 @@ limitations under the License.
 
 
 
-
-use std::hash::Hash;
 use graph_process_manager_core::process::filter::{AbstractNodePreFilter, AbstractStepFilter};
 use crate::core::predicate::PredicateOnTerm;
+use crate::core::term::RewritableLanguageOperatorSymbol;
 use crate::process::conf::RewriteConfig;
 use crate::process::context::RewritingProcessContextAndParameterization;
 use crate::process::filtration::RewritingFiltrationResult;
@@ -31,13 +30,13 @@ pub enum RewriteStepFilter {
     MaxNodeNumber(u32)
 }
 
-impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractStepFilter<RewriteConfig<LangOp>> for RewriteStepFilter {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractStepFilter<RewriteConfig<LOS>> for RewriteStepFilter {
     fn apply_filter(
         &self,
-        _context_and_param : &RewritingProcessContextAndParameterization<LangOp>,
-        global_state : &RewritingProcessState<LangOp>,
-        _parent_node : &RewriteNodeKind<LangOp>,
-        _step : &RewriteStepKind<LangOp>
+        _context_and_param : &RewritingProcessContextAndParameterization<LOS>,
+        global_state : &RewritingProcessState<LOS>,
+        _parent_node : &RewriteNodeKind<LOS>,
+        _step : &RewriteStepKind<LOS>
     ) -> Option<RewritingFiltrationResult> {
         match self {
             RewriteStepFilter::MaxNodeNumber( max_node_number ) => {
@@ -58,20 +57,20 @@ impl<LangOp: Clone + PartialEq + Eq + Hash> AbstractStepFilter<RewriteConfig<Lan
 
 
 
-pub enum RewriteNodePreFilter<LangOp: Clone + PartialEq + Eq + Hash> {
-    MustSatPredicate(Box<dyn PredicateOnTerm<LangOp>>)
+pub enum RewriteNodePreFilter<LOS : RewritableLanguageOperatorSymbol> {
+    MustSatPredicate(Box<dyn PredicateOnTerm<LOS>>)
 }
 
 
 
 
-impl<LangOp: Clone + PartialEq + Eq + Hash + 'static> AbstractNodePreFilter<RewriteConfig<LangOp>> for RewriteNodePreFilter<LangOp> {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractNodePreFilter<RewriteConfig<LOS>> for RewriteNodePreFilter<LOS> {
 
     fn apply_filter(
         &self,
-        _context_and_param : &RewritingProcessContextAndParameterization<LangOp>,
-        _global_state : &RewritingProcessState<LangOp>,
-        node : &RewriteNodeKind<LangOp>,
+        _context_and_param : &RewritingProcessContextAndParameterization<LOS>,
+        _global_state : &RewritingProcessState<LOS>,
+        node : &RewriteNodeKind<LOS>,
     ) -> Option<RewritingFiltrationResult> {
         match self {
             RewriteNodePreFilter::MustSatPredicate( pred ) => {

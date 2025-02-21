@@ -15,9 +15,8 @@ limitations under the License.
 */
 
 
-use std::hash::Hash;
 
-use super::term::LanguageTerm;
+use super::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
@@ -26,7 +25,7 @@ use super::term::LanguageTerm;
 /** 
  * A rewrite rule that may be applied at the root position of a term.
  * **/
-pub trait RewriteRule<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub trait RewriteRule<LOS : RewritableLanguageOperatorSymbol> {
 
     /** 
      * Returns a description this rewrite rule.
@@ -38,8 +37,8 @@ pub trait RewriteRule<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
      * **/
     fn try_apply(
         &self,
-        term : &LanguageTerm<LanguageOperatorSymbol>
-    ) -> Option<LanguageTerm<LanguageOperatorSymbol>>;
+        term : &LanguageTerm<LOS>
+    ) -> Option<LanguageTerm<LOS>>;
 
 }
 

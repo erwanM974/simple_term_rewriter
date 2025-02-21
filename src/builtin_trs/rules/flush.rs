@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
 /**
  Something that can check an operator is associative.
  **/
-pub trait AssociativityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
-    fn is_binary_associative(&self, op : &LanguageOperatorSymbol) -> bool;
+pub trait AssociativityChecker<LOS : RewritableLanguageOperatorSymbol> {
+    fn is_binary_associative(&self, op : &LOS) -> bool;
 }
 
 
@@ -36,11 +35,11 @@ pub trait AssociativityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq +
     i.e., it flushes the content to the right
  **/
 pub(crate) fn transformation_flush_to_the_right<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn AssociativityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn AssociativityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
     let operator_at_root = &term.operator;
     // this must be applied to a binary associative operator
     let precondition = checker.is_binary_associative(operator_at_root);
@@ -90,11 +89,11 @@ op(x,op(y,z)) -> op(op(x,y),z)
 i.e., it flushes the content to the left
  **/
 pub(crate) fn transformation_flush_to_the_left<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn AssociativityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn AssociativityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
     let operator_at_root = &term.operator;
     // this must be applied to a binary associative operator
     let precondition = checker.is_binary_associative(operator_at_root);

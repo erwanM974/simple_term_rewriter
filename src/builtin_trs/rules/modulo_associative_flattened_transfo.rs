@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 /**
@@ -41,11 +40,11 @@ use crate::core::term::LanguageTerm;
   For instance, to perform transformations such as:
   ( a* + b + c* + d )* -> ( a + b + c + d )*
  **/
- pub trait ModuloAssociativeFlattenedChecker<LangOp : Clone + PartialEq + Eq + Hash> {
+ pub trait ModuloAssociativeFlattenedChecker<LOS : RewritableLanguageOperatorSymbol> {
 
     fn is_an_associative_binary_operator_we_may_consider(
         &self, 
-        op : &LangOp
+        op : &LOS
     ) -> bool;
 
     /** 
@@ -55,7 +54,7 @@ use crate::core::term::LanguageTerm;
      * **/
     fn if_required_is_a_parent_unary_operator_we_may_consider(
         &self,
-        op : &LangOp
+        op : &LOS
     ) -> Option<bool>;
     
     /** 
@@ -69,21 +68,21 @@ use crate::core::term::LanguageTerm;
      * **/
     fn transform_flattened_sub_terms(
         &self, 
-        considered_ac_op : &LangOp, 
-        considered_parent_op : Option<&LangOp>,
-        flattened_subterms : Vec<&LanguageTerm<LangOp>>
-    ) -> Option<(Option<LangOp>,Vec<LanguageTerm<LangOp>>)>;
+        considered_ac_op : &LOS, 
+        considered_parent_op : Option<&LOS>,
+        flattened_subterms : Vec<&LanguageTerm<LOS>>
+    ) -> Option<(Option<LOS>,Vec<LanguageTerm<LOS>>)>;
 
 }
 
 
 
-fn get_associative_sub_terms_recursively<'a, LangOp : Clone + PartialEq + Eq + Hash>(
-    term : &'a LanguageTerm<LangOp>,
-    considered_associative_operator : &LangOp
-) -> Vec<&'a LanguageTerm<LangOp>> {
+fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguageOperatorSymbol>(
+    term : &'a LanguageTerm<LOS>,
+    considered_associative_operator : &LOS
+) -> Vec<&'a LanguageTerm<LOS>> {
     // ***
-    let mut sub_terms : Vec<&'a LanguageTerm<LangOp>> = Vec::new();
+    let mut sub_terms : Vec<&'a LanguageTerm<LOS>> = Vec::new();
     if &term.operator == considered_associative_operator {
         for sub_term in &term.sub_terms {
             sub_terms.extend( get_associative_sub_terms_recursively(sub_term, considered_associative_operator) );
@@ -95,10 +94,10 @@ fn get_associative_sub_terms_recursively<'a, LangOp : Clone + PartialEq + Eq + H
 }
 
 
-fn fold_associative_sub_terms_recursively<LangOp : Clone + PartialEq + Eq + Hash>(
-    considered_associative_operator : &LangOp,
-    sub_terms : &mut Vec<LanguageTerm<LangOp>>
-) -> LanguageTerm<LangOp> {
+fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSymbol>(
+    considered_associative_operator : &LOS,
+    sub_terms : &mut Vec<LanguageTerm<LOS>>
+) -> LanguageTerm<LOS> {
     let sub_terms_num = sub_terms.len();
     match sub_terms_num {
         2 => {
@@ -132,11 +131,11 @@ fn fold_associative_sub_terms_recursively<LangOp : Clone + PartialEq + Eq + Hash
 
 
 pub(crate) fn transformation_modulo_associative_flattened_transfo<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn ModuloAssociativeFlattenedChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn ModuloAssociativeFlattenedChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
 
     let (unary_op,ac_root) = match checker.if_required_is_a_parent_unary_operator_we_may_consider(&term.operator) {
         None => {

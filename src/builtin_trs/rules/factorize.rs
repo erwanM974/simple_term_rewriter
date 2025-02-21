@@ -16,15 +16,14 @@ limitations under the License.
 
 
 
-use std::hash::Hash;
-use crate::core::term::LanguageTerm;
+use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 /**
 Something that can check an operator is associative.
  **/
-pub trait DistributivityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash> {
+pub trait DistributivityChecker<LOS : RewritableLanguageOperatorSymbol> {
 
-    fn is_binary(&self, op : &LanguageOperatorSymbol) -> bool;
+    fn is_binary(&self, op : &LOS) -> bool;
 
     /**
     OP1 is left distributive over OP2 iff for any x, y and z:
@@ -34,7 +33,7 @@ pub trait DistributivityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq 
     Multiplication is left distributive over addition:
     "*(2,+(1,3)) = +(*(2,1),*(2,3))"
      **/
-    fn is_left_distributive_over(&self, op1 : &LanguageOperatorSymbol, op2 : &LanguageOperatorSymbol) -> bool;
+    fn is_left_distributive_over(&self, op1 : &LOS, op2 : &LOS) -> bool;
 
     /**
     OP1 is right distributive over OP2 iff for any x, y and z:
@@ -44,7 +43,7 @@ pub trait DistributivityChecker<LanguageOperatorSymbol : Clone + PartialEq + Eq 
     Multiplication is right distributive over addition:
     "*(+(1,3),2) = +(*(1,2),*(3,2))"
      **/
-    fn is_right_distributive_over(&self, op1 : &LanguageOperatorSymbol, op2 : &LanguageOperatorSymbol) -> bool;
+    fn is_right_distributive_over(&self, op1 : &LOS, op2 : &LOS) -> bool;
 
 }
 
@@ -54,11 +53,11 @@ Performs the following :
 OP2(OP1(x,y),OP1(x,z)) -> OP1(x,OP2(y,z))
  **/
 pub(crate) fn transformation_factorize_left_distributive<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn DistributivityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn DistributivityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
 
     let op2 = &term.operator;
     if checker.is_binary(op2) {
@@ -104,19 +103,19 @@ Performs the following :
 OP1(x,OP2(y,z)) -> OP2(OP1(x,y),OP1(x,z))
  **/
 pub(crate) fn transformation_defactorize_left_distributive<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn DistributivityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn DistributivityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
 
     let op1 = &term.operator;
     if checker.is_binary(op1) {
-        let left_sub_term = term.sub_terms.first().unwrap();
+        let x = term.sub_terms.first().unwrap();
         let right_sub_term = term.sub_terms.get(1).unwrap();
         if checker.is_binary(&right_sub_term.operator) {
             // term is of the form OP1(x,OP2(y,z))
-            let op2 = &left_sub_term.operator;
+            let op2 = &right_sub_term.operator;
             if checker.is_left_distributive_over(op1,op2) {
                 let y = right_sub_term.sub_terms.first().unwrap();
                 let z = right_sub_term.sub_terms.get(1).unwrap();
@@ -124,14 +123,14 @@ pub(crate) fn transformation_defactorize_left_distributive<
                 let new_left = LanguageTerm::new(
                     op1.clone(),
                     vec![
-                        left_sub_term.clone(),
+                        x.clone(),
                         y.clone()
                     ]
                 );
                 let new_right = LanguageTerm::new(
                     op1.clone(),
                     vec![
-                        left_sub_term.clone(),
+                        x.clone(),
                         z.clone(),
                     ]
                 );
@@ -161,11 +160,11 @@ Performs the following :
 OP2(OP1(y,x),OP1(z,x)) -> OP1(OP2(y,z),x)
  **/
 pub(crate) fn transformation_factorize_right_distributive<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn DistributivityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn DistributivityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
 
     let op2 = &term.operator;
     if checker.is_binary(op2) {
@@ -211,20 +210,20 @@ Performs the following :
 OP1(OP2(y,z),x) -> OP2(OP1(y,x),OP1(z,x))
  **/
 pub(crate) fn transformation_defactorize_right_distributive<
-    LanguageOperatorSymbol : Clone + PartialEq + Eq + Hash
+    LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn DistributivityChecker<LanguageOperatorSymbol>>,
-    term : &LanguageTerm<LanguageOperatorSymbol>
-) -> Option<LanguageTerm<LanguageOperatorSymbol>> {
+    checker : &Box<dyn DistributivityChecker<LOS>>,
+    term : &LanguageTerm<LOS>
+) -> Option<LanguageTerm<LOS>> {
 
     let op1 = &term.operator;
     if checker.is_binary(op1) {
         let left_sub_term = term.sub_terms.first().unwrap();
-        let right_sub_term = term.sub_terms.get(1).unwrap();
+        let x = term.sub_terms.get(1).unwrap();
         if checker.is_binary(&left_sub_term.operator) {
             // term is of the form OP1(OP2(y,z),x)
             let op2 = &left_sub_term.operator;
-            if checker.is_left_distributive_over(op1,op2) {
+            if checker.is_right_distributive_over(op1,op2) {
                 let y = left_sub_term.sub_terms.first().unwrap();
                 let z = left_sub_term.sub_terms.get(1).unwrap();
                 // OP1(OP2(y,z),x) -> OP2(OP1(y,x),OP1(z,x))
@@ -232,14 +231,14 @@ pub(crate) fn transformation_defactorize_right_distributive<
                     op1.clone(),
                     vec![
                         y.clone(),
-                        right_sub_term.clone()
+                        x.clone()
                     ]
                 );
                 let new_right = LanguageTerm::new(
                     op1.clone(),
                     vec![
                         z.clone(),
-                        right_sub_term.clone()
+                        x.clone()
                     ]
                 );
                 return Some(

@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::{collections::HashSet, hash::Hash};
 
-use crate::process::{context::RewritingProcessContextAndParameterization, filter::{RewriteNodePreFilter, RewriteStepFilter}, priorities::RewritePriorities};
+use std::collections::HashSet;
+
+use crate::{core::term::RewritableLanguageOperatorSymbol, process::{context::RewritingProcessContextAndParameterization, filter::{RewriteNodePreFilter, RewriteStepFilter}, priorities::RewritePriorities}};
 
 
-pub fn get_rewrite_parameters_description<LangOp : Clone + PartialEq + Eq + Hash>(
-    context_and_param : &RewritingProcessContextAndParameterization<LangOp>
+pub fn get_rewrite_parameters_description<LOS : RewritableLanguageOperatorSymbol>(
+    context_and_param : &RewritingProcessContextAndParameterization<LOS>
 ) -> Vec<Vec<String>> {
     let mut params_descs = vec![];
     for (phase_id,phase) in context_and_param.phases.iter().enumerate() {
@@ -95,7 +96,7 @@ pub fn get_rewrite_step_filter_description(filter : &RewriteStepFilter) -> Vec<S
 }
 
 
-pub fn get_rewrite_node_pre_filter_description<LangOp: Clone + PartialEq + Eq + Hash>(filter : &RewriteNodePreFilter<LangOp>) -> Vec<String> {
+pub fn get_rewrite_node_pre_filter_description<LOS : RewritableLanguageOperatorSymbol>(filter : &RewriteNodePreFilter<LOS>) -> Vec<String> {
     match filter {
         RewriteNodePreFilter::MustSatPredicate(pred) => {
             vec![format!("predicate={}",pred.get_desc())]
