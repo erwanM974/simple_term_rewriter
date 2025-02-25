@@ -108,9 +108,6 @@ pub fn get_transformations<LOS : RewritableLanguageOperatorSymbol>(
 
 
 
-/**
-  f
- **/
 fn get_root_transformations<LOS : RewritableLanguageOperatorSymbol>(
     phase_index : usize,
     rewrite_rules : &Vec<Box<dyn RewriteRule<LOS>>>,

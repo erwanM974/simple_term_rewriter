@@ -22,6 +22,59 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
+pub(crate) fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguageOperatorSymbol>(
+    term : &'a LanguageTerm<LOS>,
+    considered_associative_operator : &LOS
+) -> Vec<&'a LanguageTerm<LOS>> {
+    // ***
+    let mut sub_terms : Vec<&'a LanguageTerm<LOS>> = Vec::new();
+    if &term.operator == considered_associative_operator {
+        for sub_term in &term.sub_terms {
+            sub_terms.extend( get_associative_sub_terms_recursively(sub_term, considered_associative_operator) );
+        }
+    } else {
+        sub_terms.push(term);
+    }
+    sub_terms
+}
+
+
+pub(crate) fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSymbol>(
+    considered_associative_operator : &LOS,
+    sub_terms : &mut Vec<LanguageTerm<LOS>>
+) -> LanguageTerm<LOS> {
+    let sub_terms_num = sub_terms.len();
+    match sub_terms_num {
+        2 => {
+            let t2 = sub_terms.pop().unwrap();
+            let t1 = sub_terms.pop().unwrap();
+            LanguageTerm::new(
+                considered_associative_operator.clone(), 
+                vec![t1,t2]
+            )
+        },
+        1 => {
+            sub_terms.pop().unwrap()
+        },
+        0 => {
+            panic!("when folding sub-terms recursively, encountered an empty list");
+        },
+        _ => {
+            let t1 = sub_terms.remove(0);
+            let t2 = fold_associative_sub_terms_recursively(
+                considered_associative_operator,
+                sub_terms
+            );
+            LanguageTerm::new(
+                considered_associative_operator.clone(), 
+                vec![t1,t2]
+            )
+        }
+    }
+}
+
+
+
 
 
 /**

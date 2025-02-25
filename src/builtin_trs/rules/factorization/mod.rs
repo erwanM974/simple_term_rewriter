@@ -15,14 +15,7 @@ limitations under the License.
 */
 
 
-
-pub mod builtin_trs;
-pub mod core;
-pub mod process;
-pub mod draw_term;
-pub mod metrics;
-
-
-
-#[cfg(test)]
-mod tests;
+pub mod distributivity_checker;
+pub(crate) mod factorize_modulo_ac;
+pub(crate) mod factorize_simple;
+pub(crate) mod defactorize;

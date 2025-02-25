@@ -19,12 +19,16 @@ limitations under the License.
 use crate::core::rule::RewriteRule;
 use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
-use crate::builtin_trs::rules::factorize::{DistributivityChecker, transformation_defactorize_left_distributive, transformation_defactorize_right_distributive, transformation_factorize_left_distributive, transformation_factorize_right_distributive};
 use crate::builtin_trs::rules::flush::{AssociativityChecker, transformation_flush_to_the_left, transformation_flush_to_the_right};
 use crate::builtin_trs::rules::reorder_commute::{CommutativeCheckerAndOrderer, transformation_reorder_subterms_under_commutative_operator};
 use crate::builtin_trs::rules::simpl_binary::{GenericBinaryOperatorSimplifier, transformation_generic_simpl_under_binary_operator};
 use crate::builtin_trs::rules::simpl_unary::{GenericUnaryOperatorSimplifier, transformation_generic_simpl_under_unary_operator};
 use crate::builtin_trs::rules::modulo_associative_flattened_transfo::{ModuloAssociativeFlattenedChecker, transformation_modulo_associative_flattened_transfo};
+
+use super::rules::factorization::defactorize::{transformation_defactorize_left_distributive, transformation_defactorize_right_distributive};
+use super::rules::factorization::distributivity_checker::DistributivityChecker;
+use super::rules::factorization::factorize_modulo_ac::{transformation_factorize_left_distributive_modulo_ac, transformation_factorize_right_distributive_modulo_ac};
+use super::rules::factorization::factorize_simple::{transformation_factorize_left_distributive, transformation_factorize_right_distributive};
 
 
 pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol> {
@@ -45,13 +49,19 @@ pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol
     GenericSimplifyUnderBinary(Box<dyn GenericBinaryOperatorSimplifier<LOS>>),
     // ***
     /// refer to [transformation_factorize_left_distributive](transformation_factorize_left_distributive)
-    FactorizeLeftDistributive(Box<dyn DistributivityChecker<LOS>>),
+    FactorizeLeftDistributiveSimple(Box<dyn DistributivityChecker<LOS>>),
+    /// refer to [transformation_factorize_left_distributive_modulo_ac](transformation_factorize_left_distributive_modulo_ac)
+    FactorizeLeftDistributiveModuloAC(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_factorize_right_distributive](transformation_factorize_right_distributive)
-    FactorizeRightDistributive(Box<dyn DistributivityChecker<LOS>>),
+    FactorizeRightDistributiveSimple(Box<dyn DistributivityChecker<LOS>>),
+    /// refer to [transformation_factorize_right_distributive_modulo_ac](transformation_factorize_right_distributive_modulo_ac)
+    FactorizeRightDistributiveModuloAC(Box<dyn DistributivityChecker<LOS>>),
+    // ***
     /// refer to [transformation_defactorize_left_distributive](transformation_defactorize_left_distributive)
     DeFactorizeLeftDistributive(Box<dyn DistributivityChecker<LOS>>),
     /// refer to [transformation_defactorize_right_distributive](transformation_defactorize_right_distributive)
     DeFactorizeRightDistributive(Box<dyn DistributivityChecker<LOS>>),
+    // ***
     /// refer to [transformation_modulo_associative_flattened_transfo](transformation_modulo_associative_flattened_transfo)
     ModuloAssociativeFlattenedTransfo(Box<dyn ModuloAssociativeFlattenedChecker<LOS>>)
 }
@@ -111,7 +121,15 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
                     term
                 )
             },
-            BuiltinRewriteTransformationKind::FactorizeLeftDistributive(
+            BuiltinRewriteTransformationKind::FactorizeLeftDistributiveModuloAC(
+                rule_application_checker
+            ) => {
+                transformation_factorize_left_distributive_modulo_ac::<LOS>(
+                    rule_application_checker,
+                    term
+                )
+            },
+            BuiltinRewriteTransformationKind::FactorizeLeftDistributiveSimple(
                 rule_application_checker
             ) => {
                 transformation_factorize_left_distributive::<LOS>(
@@ -127,7 +145,15 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
                     term
                 )
             },
-            BuiltinRewriteTransformationKind::FactorizeRightDistributive(
+            BuiltinRewriteTransformationKind::FactorizeRightDistributiveModuloAC(
+                rule_application_checker
+            ) => {
+                transformation_factorize_right_distributive_modulo_ac::<LOS>(
+                    rule_application_checker,
+                    term
+                )
+            },
+            BuiltinRewriteTransformationKind::FactorizeRightDistributiveSimple(
                 rule_application_checker
             ) => {
                 transformation_factorize_right_distributive::<LOS>(

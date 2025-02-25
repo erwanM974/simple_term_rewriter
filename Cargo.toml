@@ -1,6 +1,6 @@
 [package]
 name = "simple_term_rewriter"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["Erwan Mahe"]
 edition = "2021"
 
