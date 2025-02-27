@@ -17,6 +17,7 @@ limitations under the License.
 
 pub mod factorization;
 pub mod flush;
+pub mod modulo_ac_reorderer;
 pub mod modulo_associative_flattened_transfo;
 pub mod reorder_commute;
 pub mod simpl_binary;

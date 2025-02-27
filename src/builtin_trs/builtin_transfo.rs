@@ -20,15 +20,16 @@ use crate::core::rule::RewriteRule;
 use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 use crate::builtin_trs::rules::flush::{AssociativityChecker, transformation_flush_to_the_left, transformation_flush_to_the_right};
-use crate::builtin_trs::rules::reorder_commute::{CommutativeCheckerAndOrderer, transformation_reorder_subterms_under_commutative_operator};
+use crate::builtin_trs::rules::reorder_commute::{BasicCommutativeCheckerAndOrderer, transformation_basic_reorder_subterms_under_commutative_operator};
 use crate::builtin_trs::rules::simpl_binary::{GenericBinaryOperatorSimplifier, transformation_generic_simpl_under_binary_operator};
 use crate::builtin_trs::rules::simpl_unary::{GenericUnaryOperatorSimplifier, transformation_generic_simpl_under_unary_operator};
-use crate::builtin_trs::rules::modulo_associative_flattened_transfo::{ModuloAssociativeFlattenedChecker, transformation_modulo_associative_flattened_transfo};
+use crate::builtin_trs::rules::modulo_associative_flattened_transfo::{ModuloAssociativeGenericFlattenedChecker, transformation_modulo_associative_generic_flattened_transfo};
 
 use super::rules::factorization::defactorize::{transformation_defactorize_left_distributive, transformation_defactorize_right_distributive};
 use super::rules::factorization::distributivity_checker::DistributivityChecker;
 use super::rules::factorization::factorize_modulo_ac::{transformation_factorize_left_distributive_modulo_ac, transformation_factorize_right_distributive_modulo_ac};
 use super::rules::factorization::factorize_simple::{transformation_factorize_left_distributive, transformation_factorize_right_distributive};
+use super::rules::modulo_ac_reorderer::{transformation_modulo_assoc_partial_reordering, ModuloAssociativePartialReorderer};
 
 
 pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol> {
@@ -39,8 +40,11 @@ pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol
     /// refer to [transformation_flush_to_the_left](transformation_flush_to_the_left)
     AssociativeFlushLeft(Box<dyn AssociativityChecker<LOS>>),
     // ***
-    /// refer to [transformation_reorder_subterms_under_commutative_operator](transformation_reorder_subterms_under_commutative_operator)
-    ReorderOperandsIfCommutative(Box<dyn CommutativeCheckerAndOrderer<LOS>>),
+    /// refer to [transformation_basic_reorder_subterms_under_commutative_operator](transformation_basic_reorder_subterms_under_commutative_operator)
+    ReorderOperandsIfCommuteBasic(Box<dyn BasicCommutativeCheckerAndOrderer<LOS>>),
+    // ***
+    /// refer to [transformation_modulo_assoc_partial_reordering](transformation_modulo_assoc_partial_reordering)
+    ReorderOperandsIfCommuteModuloAC(Box<dyn ModuloAssociativePartialReorderer<LOS>>),
     // ***
     /// refer to [transformation_generic_simpl_under_unary_operator](transformation_generic_simpl_under_unary_operator)
     GenericSimplifyUnderUnary(Box<dyn GenericUnaryOperatorSimplifier<LOS>>),
@@ -62,8 +66,8 @@ pub enum BuiltinRewriteTransformationKind<LOS : RewritableLanguageOperatorSymbol
     /// refer to [transformation_defactorize_right_distributive](transformation_defactorize_right_distributive)
     DeFactorizeRightDistributive(Box<dyn DistributivityChecker<LOS>>),
     // ***
-    /// refer to [transformation_modulo_associative_flattened_transfo](transformation_modulo_associative_flattened_transfo)
-    ModuloAssociativeFlattenedTransfo(Box<dyn ModuloAssociativeFlattenedChecker<LOS>>)
+    /// refer to [transformation_modulo_associative_generic_flattened_transfo](transformation_modulo_associative_generic_flattened_transfo)
+    ModuloAssociativeGenericFlattenedTransfo(Box<dyn ModuloAssociativeGenericFlattenedChecker<LOS>>)
 }
 
 
@@ -97,14 +101,22 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
                     term
                 )
             },
-            BuiltinRewriteTransformationKind::ReorderOperandsIfCommutative(
+            BuiltinRewriteTransformationKind::ReorderOperandsIfCommuteBasic(
                 rule_application_checker
             ) => {
-                transformation_reorder_subterms_under_commutative_operator::<LOS>(
+                transformation_basic_reorder_subterms_under_commutative_operator::<LOS>(
                     rule_application_checker,
                     term
                 )
-            }
+            },
+            BuiltinRewriteTransformationKind::ReorderOperandsIfCommuteModuloAC(
+                rule_application_checker
+            ) => {
+                transformation_modulo_assoc_partial_reordering::<LOS>(
+                    rule_application_checker,
+                    term
+                )
+            },
             BuiltinRewriteTransformationKind::GenericSimplifyUnderUnary(
                 rule_application_checker
             ) => {
@@ -169,10 +181,10 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
                     term
                 )
             },
-            BuiltinRewriteTransformationKind::ModuloAssociativeFlattenedTransfo(
+            BuiltinRewriteTransformationKind::ModuloAssociativeGenericFlattenedTransfo(
                 rule_application_checker
             ) => {
-                transformation_modulo_associative_flattened_transfo::<LOS>(
+                transformation_modulo_associative_generic_flattened_transfo::<LOS>(
                     rule_application_checker,
                     term
                 )

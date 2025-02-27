@@ -41,7 +41,7 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
   For instance, to perform transformations such as:
   ( a* + b + c* + d )* -> ( a + b + c + d )*
  **/
- pub trait ModuloAssociativeFlattenedChecker<LOS : RewritableLanguageOperatorSymbol> {
+ pub trait ModuloAssociativeGenericFlattenedChecker<LOS : RewritableLanguageOperatorSymbol> {
 
     fn is_an_associative_binary_operator_we_may_consider(
         &self, 
@@ -78,10 +78,10 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
-pub(crate) fn transformation_modulo_associative_flattened_transfo<
+pub(crate) fn transformation_modulo_associative_generic_flattened_transfo<
     LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn ModuloAssociativeFlattenedChecker<LOS>>,
+    checker : &Box<dyn ModuloAssociativeGenericFlattenedChecker<LOS>>,
     term : &LanguageTerm<LOS>
 ) -> Option<LanguageTerm<LOS>> {
 

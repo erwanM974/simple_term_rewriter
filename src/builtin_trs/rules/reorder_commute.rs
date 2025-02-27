@@ -23,7 +23,7 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
  Something that can check two sub-terms may be commuted when under a given root.
 And that provide a total order on the language's operator symbols.
  **/
-pub trait CommutativeCheckerAndOrderer<LOS : RewritableLanguageOperatorSymbol> {
+pub trait BasicCommutativeCheckerAndOrderer<LOS : RewritableLanguageOperatorSymbol> {
     fn is_a_binary_operator_we_may_consider(
         &self,
         op : &LOS
@@ -64,10 +64,10 @@ op(y,op(x,_)) -> op(x,op(y,_))
 and 
 op(op(_,y),x) -> op(op(_,x),y)
  **/
-pub(crate) fn transformation_reorder_subterms_under_commutative_operator<
+pub(crate) fn transformation_basic_reorder_subterms_under_commutative_operator<
     LOS : RewritableLanguageOperatorSymbol
 >(
-    checker : &Box<dyn CommutativeCheckerAndOrderer<LOS>>,
+    checker : &Box<dyn BasicCommutativeCheckerAndOrderer<LOS>>,
     term : &LanguageTerm<LOS>
 ) -> Option<LanguageTerm<LOS>> {
     if !checker.is_a_binary_operator_we_may_consider(&term.operator) {

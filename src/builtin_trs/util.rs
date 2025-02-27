@@ -76,6 +76,35 @@ pub(crate) fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOpe
 
 
 
+pub fn lexicographic_path_ordering<LOS : RewritableLanguageOperatorSymbol>(
+    s : &LanguageTerm<LOS>,
+    t : &LanguageTerm<LOS>,
+    compare_operators : &dyn Fn(&LOS,&LOS) -> Ordering,
+    get_arity : &dyn Fn(&LOS) -> usize
+) -> std::cmp::Ordering {
+    if s == t {
+        std::cmp::Ordering::Equal
+    } else if is_greater_as_per_lexicographic_path_ordering(
+        s, 
+        t, 
+        compare_operators, 
+        get_arity
+    ) {
+        std::cmp::Ordering::Greater
+    } else {
+        debug_assert!(
+            is_greater_as_per_lexicographic_path_ordering(
+                t, 
+                s, 
+                compare_operators, 
+                get_arity
+            )
+        );
+        std::cmp::Ordering::Less
+    }
+}
+
+
 
 /**
  Given a total order on the operator symbols, we derive a total order on the terms built using these operator symbols.
