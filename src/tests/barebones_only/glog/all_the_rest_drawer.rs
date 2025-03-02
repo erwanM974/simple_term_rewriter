@@ -24,11 +24,11 @@ use image::Rgb;
 use image_colored_text::text::line::ColoredTextLine;
 use image_colored_text::text::paragraph::{ColoredTextParagraph, MultiLineTextAlignment};
 
-use crate::process::conf::RewriteConfig;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::filtration::RewritingFiltrationResult;
-use crate::process::node::RewriteNodeKind;
-use crate::process::step::RewriteStepKind;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filtration::RewritingFiltrationResult;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::step::RewriteStepKind;
 
 use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
 use crate::tests::common::util::new_image_with_colored_text;

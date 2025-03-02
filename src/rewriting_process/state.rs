@@ -18,11 +18,11 @@ limitations under the License.
 use std::collections::HashMap;
 use graph_process_manager_core::process::persistent_state::AbstractProcessMutablePersistentState;
 use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
-use crate::process::conf::RewriteConfig;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::filtration::RewritingFiltrationResult;
-use crate::process::node::RewriteNodeKind;
-use crate::process::step::RewriteStepKind;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filtration::RewritingFiltrationResult;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::step::RewriteStepKind;
 
 pub struct RewritingProcessState<LOS : RewritableLanguageOperatorSymbol> {
     /// keeps track of the irreducible terms encountered in each phase of the rewriting process

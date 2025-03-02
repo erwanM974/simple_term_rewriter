@@ -21,9 +21,9 @@ use graph_process_manager_loggers::graphviz::item::BuiltinGraphvizLoggerItemStyl
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem};
 
 use crate::draw_term::{draw_term_tree_with_graphviz, TermDrawingContext};
-use crate::process::conf::RewriteConfig;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::node::RewriteNodeKind;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::node::RewriteNodeKind;
 use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
 
 

@@ -15,20 +15,6 @@ limitations under the License.
 */
 
 
-
-pub mod core;
-pub mod rewriting_process;
-pub mod draw_term;
-pub mod metrics;
-
-
-
-#[cfg(feature = "builtin_trs")]
-pub mod builtin_trs;
-
-#[cfg(feature = "random_term_generation")]
-pub mod random_term_generation;
-
-
-#[cfg(test)]
-mod tests;
+pub mod probas;
+mod gen;
+pub mod types;

@@ -22,7 +22,7 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
-pub(crate) fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguageOperatorSymbol>(
+pub fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguageOperatorSymbol>(
     term : &'a LanguageTerm<LOS>,
     considered_associative_operator : &LOS
 ) -> Vec<&'a LanguageTerm<LOS>> {
@@ -39,7 +39,7 @@ pub(crate) fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguage
 }
 
 
-pub(crate) fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSymbol>(
+pub fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSymbol>(
     considered_associative_operator : &LOS,
     sub_terms : &mut Vec<LanguageTerm<LOS>>
 ) -> LanguageTerm<LOS> {

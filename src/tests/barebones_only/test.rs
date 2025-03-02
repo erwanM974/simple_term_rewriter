@@ -19,7 +19,7 @@ use graph_process_manager_core::{process::{filter::GenericFiltersManager, manage
 use graph_process_manager_loggers::graphviz::{format::GraphVizProcessLoggerLayout, logger::{GenericGraphVizLogger, GenericGraphVizLoggerConfiguration}};
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
-use crate::{core::term::LanguageTerm, process::{conf::RewriteConfig, context::{RewritingProcessContextAndParameterization, RewritingProcessPhase}, node::RewriteNodeKind, priorities::RewritePriorities}, tests::barebones_only::glog::{all_the_rest_drawer::MinimalRewritingStepDrawer, legend_writer::MinimalLegendWriter, node_drawer::MinimalRewritingNodeDrawer}};
+use crate::{core::term::LanguageTerm, rewriting_process::{conf::RewriteConfig, context::{RewritingProcessContextAndParameterization, RewritingProcessPhase}, node::RewriteNodeKind, priorities::RewritePriorities}, tests::barebones_only::glog::{all_the_rest_drawer::MinimalRewritingStepDrawer, legend_writer::MinimalLegendWriter, node_drawer::MinimalRewritingNodeDrawer}};
 
 
 use super::lang::{MinimalExampleLangOperators, MinimalExampleTransformationKind};

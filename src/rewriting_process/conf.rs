@@ -17,13 +17,13 @@ limitations under the License.
 use std::marker::PhantomData;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use crate::core::term::RewritableLanguageOperatorSymbol;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::filtration::RewritingFiltrationResult;
-use crate::process::handler::RewriteProcessHandler;
-use crate::process::node::RewriteNodeKind;
-use crate::process::priorities::RewritePriorities;
-use crate::process::state::RewritingProcessState;
-use crate::process::step::RewriteStepKind;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filtration::RewritingFiltrationResult;
+use crate::rewriting_process::handler::RewriteProcessHandler;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::priorities::RewritePriorities;
+use crate::rewriting_process::state::RewritingProcessState;
+use crate::rewriting_process::step::RewriteStepKind;
 
 
 pub struct RewriteConfig<LOS : RewritableLanguageOperatorSymbol> {

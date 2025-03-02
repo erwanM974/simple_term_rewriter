@@ -17,12 +17,12 @@ limitations under the License.
 use graph_process_manager_core::process::filter::{AbstractNodePostFilter, AbstractNodePreFilter, AbstractStepFilter};
 use graph_process_manager_loggers::graphviz::drawers::legend_writer::ProcessLegendWriter;
 
-use crate::process::conf::RewriteConfig;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::filter::{RewriteNodePreFilter, RewriteStepFilter};
-use crate::process::loggers::glog::legend_writer_utils::{get_rewrite_node_pre_filter_description, get_rewrite_parameters_description, get_rewrite_priorities_description, get_rewrite_step_filter_description};
-use crate::process::priorities::RewritePriorities;
-use crate::process::state::RewritingProcessState;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filter::{RewriteNodePreFilter, RewriteStepFilter};
+use crate::rewriting_process::loggers::glog::legend_writer_utils::{get_rewrite_node_pre_filter_description, get_rewrite_parameters_description, get_rewrite_priorities_description, get_rewrite_step_filter_description};
+use crate::rewriting_process::priorities::RewritePriorities;
+use crate::rewriting_process::state::RewritingProcessState;
 use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
 
 

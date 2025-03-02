@@ -17,7 +17,7 @@ limitations under the License.
 
 use std::collections::HashSet;
 
-use crate::{core::term::RewritableLanguageOperatorSymbol, process::{context::RewritingProcessContextAndParameterization, filter::{RewriteNodePreFilter, RewriteStepFilter}, priorities::RewritePriorities}};
+use crate::{core::term::RewritableLanguageOperatorSymbol, rewriting_process::{context::RewritingProcessContextAndParameterization, filter::{RewriteNodePreFilter, RewriteStepFilter}, priorities::RewritePriorities}};
 
 
 pub fn get_rewrite_parameters_description<LOS : RewritableLanguageOperatorSymbol>(

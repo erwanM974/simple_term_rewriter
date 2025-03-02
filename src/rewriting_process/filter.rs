@@ -19,12 +19,12 @@ limitations under the License.
 use graph_process_manager_core::process::filter::{AbstractNodePreFilter, AbstractStepFilter};
 use crate::core::predicate::PredicateOnTerm;
 use crate::core::term::RewritableLanguageOperatorSymbol;
-use crate::process::conf::RewriteConfig;
-use crate::process::context::RewritingProcessContextAndParameterization;
-use crate::process::filtration::RewritingFiltrationResult;
-use crate::process::node::RewriteNodeKind;
-use crate::process::state::RewritingProcessState;
-use crate::process::step::RewriteStepKind;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filtration::RewritingFiltrationResult;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::state::RewritingProcessState;
+use crate::rewriting_process::step::RewriteStepKind;
 
 pub enum RewriteStepFilter {
     MaxNodeNumber(u32)

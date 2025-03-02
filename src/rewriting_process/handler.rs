@@ -17,12 +17,12 @@ limitations under the License.
 
 use graph_process_manager_core::process::handler::AbstractAlgorithmOperationHandler;
 use crate::core::term::RewritableLanguageOperatorSymbol;
-use crate::process::conf::RewriteConfig;
-use crate::process::node::RewriteNodeKind;
-use crate::process::step::RewriteStepKind;
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::step::RewriteStepKind;
 
 use crate::core::apply::get_transformations;
-use crate::process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 
 pub struct RewriteProcessHandler {}
 
