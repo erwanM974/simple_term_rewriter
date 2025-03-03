@@ -91,7 +91,8 @@ pub(crate) fn transformation_modulo_assoc_partial_reordering<
         if has_changed_global {
             let folded_transformed = fold_associative_sub_terms_recursively(
                 considered_ac_operator,
-                &mut flattened_sub_terms
+                &mut flattened_sub_terms, 
+                &None
             );
             return Some(folded_transformed);
         }
@@ -201,7 +202,8 @@ mod test {
             ].into_iter().map(|x| LanguageTerm::new(x, vec![])).collect();
             fold_associative_sub_terms_recursively(
                 &TestOperator::THEN, 
-                &mut sub_terms
+                &mut sub_terms, 
+                &None
             )
         };
         let reordered : Box<dyn ModuloAssociativePartialReorderer<TestOperator>> = Box::new(ReordererChecker{});

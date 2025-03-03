@@ -78,6 +78,17 @@ use super::distributivity_checker::DistributivityChecker;
                         vec![ (sub_term_id,second_to_last) ]
                     );
                 }
+            } else {
+                // in ALT( x1, x2, ..., xn ), we simply consider a whole xi as a left-hand-side factor
+                if found.contains_key(*sub_term) {
+                    let got = found.get_mut(*sub_term).unwrap();
+                    got.push( (sub_term_id,vec![]) );
+                } else {
+                    found.insert(
+                        *sub_term, 
+                        vec![ (sub_term_id,vec![]) ]
+                    );
+                }
             }
         }
         for (lhs,rhss) in found {
@@ -92,14 +103,16 @@ use super::distributivity_checker::DistributivityChecker;
                     rhss_as_terms.push(
                         fold_associative_sub_terms_recursively(
                             &head_op, 
-                            &mut rhs
+                            &mut rhs, 
+                            &Some(checker.get_empty_operation_symbol())
                         )
                     );
                 }
                 // ALT( SEQ(xi2,...) , SEQ(xj2, ...) )
                 let rhss_op2 = fold_associative_sub_terms_recursively(
                     op2, 
-                    &mut rhss_as_terms
+                    &mut rhss_as_terms, 
+                    &Some(checker.get_empty_operation_symbol())
                 );
                 // SEQ( y, ALT( SEQ(xi2,...) , SEQ(xj2, ...) ) )
                 let factorized = LanguageTerm::new(
@@ -129,7 +142,8 @@ use super::distributivity_checker::DistributivityChecker;
         // we fold with the op2 operator
         let new_term = fold_associative_sub_terms_recursively(
             op2, 
-            &mut new_sub_terms
+            &mut new_sub_terms, 
+            &Some(checker.get_empty_operation_symbol())
         );
         return Some(new_term);
     }
@@ -194,7 +208,18 @@ if checker.is_binary(op2) && checker.is_commutative(op2) {
                        vec![ (sub_term_id,first_to_before_last) ]
                    );
                }
-           }
+           } else {
+            // in ALT( x1, x2, ..., xn ), we simply consider a whole xi as a right-hand-side factor
+            if found.contains_key(*sub_term) {
+                let got = found.get_mut(*sub_term).unwrap();
+                got.push( (sub_term_id,vec![]) );
+            } else {
+                found.insert(
+                    *sub_term, 
+                    vec![ (sub_term_id,vec![]) ]
+                );
+            }
+        }
        }
        for (rhs,lhss) in found {
            if lhss.len() > 1 {
@@ -208,14 +233,16 @@ if checker.is_binary(op2) && checker.is_commutative(op2) {
                    lhss_as_terms.push(
                        fold_associative_sub_terms_recursively(
                            &head_op, 
-                           &mut lhs
+                           &mut lhs, 
+                           &Some(checker.get_empty_operation_symbol())
                        )
                    );
                }
                // ALT( SEQ(xi1,...ximi) , SEQ(xj1, ...,xjmj) )
                let lhss_op2 = fold_associative_sub_terms_recursively(
                    op2, 
-                   &mut lhss_as_terms
+                   &mut lhss_as_terms, 
+                   &Some(checker.get_empty_operation_symbol())
                );
                // SEQ( ALT( SEQ(xi1,...ximi) , SEQ(xj1, ...,xjmj) ), y )
                let factorized = LanguageTerm::new(
@@ -245,7 +272,8 @@ if checker.is_binary(op2) && checker.is_commutative(op2) {
        // we fold with the op2 operator
        let new_term = fold_associative_sub_terms_recursively(
            op2, 
-           &mut new_sub_terms
+           &mut new_sub_terms, 
+           &Some(checker.get_empty_operation_symbol())
        );
        return Some(new_term);
    }

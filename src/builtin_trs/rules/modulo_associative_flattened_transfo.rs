@@ -114,7 +114,8 @@ pub(crate) fn transformation_modulo_associative_generic_flattened_transfo<
             ) {
                 let folded_transformed = fold_associative_sub_terms_recursively(
                     considered_associative_operator,
-                    &mut transformed_flattened
+                    &mut transformed_flattened, 
+                    &None
                 );
                 let got = match new_parent {
                     None => {

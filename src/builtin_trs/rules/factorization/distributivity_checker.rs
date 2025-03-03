@@ -48,5 +48,11 @@ pub trait DistributivityChecker<LOS : RewritableLanguageOperatorSymbol> {
      **/
     fn is_right_distributive_over(&self, op1 : &LOS, op2 : &LOS) -> bool;
 
+    /** 
+     * When factorizing OP1(OP2(x,y),x) -> OP2(x,OP1(y,0))
+     * We need to know the "0" empty operator symbol.
+     * **/
+    fn get_empty_operation_symbol(&self) -> LOS;
+
 }
 

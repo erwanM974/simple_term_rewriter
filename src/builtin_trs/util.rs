@@ -41,7 +41,8 @@ pub fn get_associative_sub_terms_recursively<'a, LOS : RewritableLanguageOperato
 
 pub fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSymbol>(
     considered_associative_operator : &LOS,
-    sub_terms : &mut Vec<LanguageTerm<LOS>>
+    sub_terms : &mut Vec<LanguageTerm<LOS>>,
+    default_empty_term : &Option<LOS>
 ) -> LanguageTerm<LOS> {
     let sub_terms_num = sub_terms.len();
     match sub_terms_num {
@@ -57,13 +58,18 @@ pub fn fold_associative_sub_terms_recursively<LOS : RewritableLanguageOperatorSy
             sub_terms.pop().unwrap()
         },
         0 => {
-            panic!("when folding sub-terms recursively, encountered an empty list");
+            if let Some(empty_op) = default_empty_term {
+                LanguageTerm::new(empty_op.clone(), vec![])
+            } else {
+                panic!("when folding sub-terms recursively, encountered an empty list, and no empty term is specified");
+            }
         },
         _ => {
             let t1 = sub_terms.remove(0);
             let t2 = fold_associative_sub_terms_recursively(
                 considered_associative_operator,
-                sub_terms
+                sub_terms,
+                default_empty_term
             );
             LanguageTerm::new(
                 considered_associative_operator.clone(), 
