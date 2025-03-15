@@ -15,13 +15,12 @@ limitations under the License.
 */
 
 
-use std::fmt;
 
-use crate::core::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub enum MinimalExampleLangOperators {
+pub enum SimplisticBooleanLogicOperators {
     TRUE,
     FALSE,
     OR,
@@ -29,21 +28,7 @@ pub enum MinimalExampleLangOperators {
     NEG 
 }
 
-impl RewritableLanguageOperatorSymbol for MinimalExampleLangOperators {}
+impl RewritableLanguageOperatorSymbol for SimplisticBooleanLogicOperators {}
 
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub enum MinimalExampleTransformationKind {
-    DoubleNegation,
-    EvaluateNeg,
-    EvaluateAnd,
-    EvaluateOr
-}
-
-
-impl fmt::Display for MinimalExampleTransformationKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
 

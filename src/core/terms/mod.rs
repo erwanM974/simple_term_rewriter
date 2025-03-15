@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+pub mod term;
+pub mod conversion;
+pub mod position;
 
-mod common;
-mod barebones_only;
-mod boolean_logic;

@@ -16,7 +16,7 @@ limitations under the License.
 
 use rand::prelude::StdRng;
 
-use crate::core::term::LanguageTerm;
+use crate::core::terms::term::LanguageTerm;
 
 use super::probas::TermGenerationSymbolsProbabilities;
 use super::types::{RandomTermGenerationConfig, TermGenerationSymbol, TermPatternForRandomGeneration};
@@ -35,7 +35,20 @@ impl<CONF : RandomTermGenerationConfig>  RandomTermGenerationStopCriterion<CONF>
 }
 
 
+
 pub fn generate_random_term<CONF : RandomTermGenerationConfig>(
+    probas : &TermGenerationSymbolsProbabilities<CONF>,
+    stop_crit : &RandomTermGenerationStopCriterion<CONF>,
+    context : &CONF::CONTEXT,
+    rng : &mut StdRng
+) -> LanguageTerm<CONF::LOS> {
+    generate_random_term_rec(
+        probas,0,stop_crit,context,rng
+    )
+}
+
+
+fn generate_random_term_rec<CONF : RandomTermGenerationConfig>(
     probas : &TermGenerationSymbolsProbabilities<CONF>,
     depth : u32,
     stop_crit : &RandomTermGenerationStopCriterion<CONF>,
@@ -59,7 +72,7 @@ pub fn generate_random_term<CONF : RandomTermGenerationConfig>(
             let mut sub_terms = vec![];
             for _ in 0..CONF::get_arity(&s) {
                 sub_terms.push( 
-                    generate_random_term(probas,depth+1,stop_crit,context,rng)
+                    generate_random_term_rec(probas,depth+1,stop_crit,context,rng)
                 );
             }
             LanguageTerm::new(s.clone(), sub_terms)

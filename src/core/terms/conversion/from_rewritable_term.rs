@@ -17,7 +17,7 @@ limitations under the License.
 
 
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 pub trait FromRewritableTermToDomainSpecificTerm<LOS : RewritableLanguageOperatorSymbol> : Sized + Clone {

@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 
-pub mod lang;
 pub mod rules;
 
 pub mod glog;

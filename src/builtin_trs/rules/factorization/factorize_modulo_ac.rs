@@ -19,7 +19,8 @@ limitations under the License.
 
 use std::{collections::{HashMap, HashSet}, vec};
 
-use crate::{builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively}, core::term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
+use crate::core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
+use crate::builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively};
 
 use super::distributivity_checker::DistributivityChecker;
 
@@ -31,11 +32,27 @@ use super::distributivity_checker::DistributivityChecker;
  LOS : RewritableLanguageOperatorSymbol
 >(
  checker : &Box<dyn DistributivityChecker<LOS>>,
- term : &LanguageTerm<LOS>
+ term : &LanguageTerm<LOS>,
+ context_term : &LanguageTerm<LOS>,
+ position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
  let op2 = &term.operator;
  if checker.is_binary(op2) && checker.is_commutative(op2) {
+
+    {
+        // if the parent is also the same operator, do not try applyng the transformation
+        // as it can be done from the parent
+        if let Some(parent_pos) = position_in_context_term.get_parent_position() {
+            if let Some(parent_term) = context_term.get_sub_term_at_position(
+                &parent_pos
+            ) {
+                if &parent_term.operator == op2 {
+                    return None;
+                }
+            }
+        }
+    }
 
     // ALT( x1, x2, ..., xn )
     let sub_terms = if checker.is_associative(op2) {
@@ -161,11 +178,27 @@ pub(crate) fn transformation_factorize_right_distributive_modulo_ac<
 LOS : RewritableLanguageOperatorSymbol
 >(
 checker : &Box<dyn DistributivityChecker<LOS>>,
-term : &LanguageTerm<LOS>
+term : &LanguageTerm<LOS>,
+context_term : &LanguageTerm<LOS>,
+position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
 let op2 = &term.operator;
 if checker.is_binary(op2) && checker.is_commutative(op2) {
+
+    {
+        // if the parent is also the same operator, do not try applyng the transformation
+        // as it can be done from the parent
+        if let Some(parent_pos) = position_in_context_term.get_parent_position() {
+            if let Some(parent_term) = context_term.get_sub_term_at_position(
+                &parent_pos
+            ) {
+                if &parent_term.operator == op2 {
+                    return None;
+                }
+            }
+        }
+    }
 
    // ALT( x1, x2, ..., xn )
    let sub_terms = if checker.is_associative(op2) {

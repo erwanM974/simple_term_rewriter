@@ -18,26 +18,31 @@ limitations under the License.
 use graph_process_manager_core::{process::{filter::GenericFiltersManager, manager::GenericProcessManager}, queue::{priorities::GenericProcessPriorities, strategy::QueueSearchStrategy}};
 use graph_process_manager_loggers::graphviz::{format::GraphVizProcessLoggerLayout, logger::{GenericGraphVizLogger, GenericGraphVizLoggerConfiguration}};
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
+use maplit::hashset;
 
-use crate::{core::term::LanguageTerm, rewriting_process::{conf::RewriteConfig, context::{RewritingProcessContextAndParameterization, RewritingProcessPhase}, node::RewriteNodeKind, priorities::RewritePriorities}, tests::barebones_only::glog::{all_the_rest_drawer::MinimalRewritingStepDrawer, legend_writer::MinimalLegendWriter, node_drawer::MinimalRewritingNodeDrawer}};
+use crate::{core::terms::term::LanguageTerm, rewriting_process::context::AbstractRewritingPhase, tests::{barebones_only::rules::MinimalExampleTransformationKind, boolean_logic::lang::SimplisticBooleanLogicOperators}};
+use crate::rewriting_process::conf::RewriteConfig;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::node::RewriteNodeKind;
+use crate::rewriting_process::priorities::RewritePriorities; 
+use crate::tests::barebones_only::glog::{all_the_rest_drawer::MinimalRewritingStepDrawer, legend_writer::MinimalLegendWriter, node_drawer::MinimalRewritingNodeDrawer};
 
 
-use super::lang::{MinimalExampleLangOperators, MinimalExampleTransformationKind};
 
 
-pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
+pub fn get_term_1() -> LanguageTerm<SimplisticBooleanLogicOperators> {
 
     LanguageTerm::new(
-        MinimalExampleLangOperators::AND, 
+        SimplisticBooleanLogicOperators::AND, 
         vec![
             LanguageTerm::new(
-                MinimalExampleLangOperators::NEG,
+                SimplisticBooleanLogicOperators::NEG,
                 vec![
                     LanguageTerm::new(
-                        MinimalExampleLangOperators::NEG,
+                        SimplisticBooleanLogicOperators::NEG,
                         vec![
                             LanguageTerm::new(
-                                MinimalExampleLangOperators::TRUE,
+                                SimplisticBooleanLogicOperators::TRUE,
                                 vec![]
                             )
                         ]
@@ -45,23 +50,23 @@ pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
                 ]
             ),
             LanguageTerm::new(
-                MinimalExampleLangOperators::OR,
+                SimplisticBooleanLogicOperators::OR,
                 vec![
                     LanguageTerm::new(
-                        MinimalExampleLangOperators::AND,
+                        SimplisticBooleanLogicOperators::AND,
                         vec![
                             LanguageTerm::new(
-                                MinimalExampleLangOperators::FALSE,
+                                SimplisticBooleanLogicOperators::FALSE,
                                 vec![]
                             ),
                             LanguageTerm::new(
-                                MinimalExampleLangOperators::FALSE,
+                                SimplisticBooleanLogicOperators::FALSE,
                                 vec![]
                             ),
                         ]
                     ),
                     LanguageTerm::new(
-                        MinimalExampleLangOperators::TRUE,
+                        SimplisticBooleanLogicOperators::TRUE,
                         vec![]
                     )
                 ] 
@@ -78,17 +83,21 @@ pub fn get_term_1() -> LanguageTerm<MinimalExampleLangOperators> {
 pub fn test() {
 
     let term = get_term_1();
-    let phase = RewritingProcessPhase::new(
+    let phase = AbstractRewritingPhase::new(
         vec![
             Box::new(MinimalExampleTransformationKind::DoubleNegation),
             Box::new(MinimalExampleTransformationKind::EvaluateNeg),
             Box::new(MinimalExampleTransformationKind::EvaluateAnd),
             Box::new(MinimalExampleTransformationKind::EvaluateOr),
         ],
+        None,
+        None
+    );
+    let context_and_param = RewritingProcessContextAndParameterization::new(
+        vec![phase],
         false
     );
-    let context_and_param = RewritingProcessContextAndParameterization::new(vec![phase]);
-    let graphviz_logger : GenericGraphVizLogger<RewriteConfig<MinimalExampleLangOperators>> = {
+    let graphviz_logger : GenericGraphVizLogger<RewriteConfig<SimplisticBooleanLogicOperators>> = {
         let gv_conf = GenericGraphVizLoggerConfiguration::new(
             GraphVizOutputFormat::svg, 
             true, 
@@ -107,23 +116,24 @@ pub fn test() {
 
     // ***
 
-    let mut manager : GenericProcessManager<RewriteConfig<MinimalExampleLangOperators>> = GenericProcessManager::new(
+    let mut manager : GenericProcessManager<RewriteConfig<SimplisticBooleanLogicOperators>> = GenericProcessManager::new(
         context_and_param,
         QueueSearchStrategy::DFS,
-        GenericProcessPriorities::new(RewritePriorities::default(),false),
+        GenericProcessPriorities::new(RewritePriorities{},false),
         GenericFiltersManager::new(
             vec![], 
             vec![], 
             vec![]
         ),
         vec![Box::new(graphviz_logger)],
-        true
+        true,
+        RewriteNodeKind::new(term.clone(),0)
     );
 
-    manager.start_process(RewriteNodeKind::new(term.clone(),0));
+    manager.start_process();
 
-    let x = manager.global_state.irreducible_terms_per_phase.get(&0).unwrap();
-    let result = x.first().unwrap();
+    let irreducible_terms = &manager.global_state.concrete_phases.last().unwrap().final_irreducible_terms;
     
-    assert_eq!(result.operator, MinimalExampleLangOperators::TRUE);
+    let expected_term = LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE,vec![]);
+    assert_eq!(irreducible_terms, &hashset!{expected_term});
 }

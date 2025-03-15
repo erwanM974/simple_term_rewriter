@@ -26,8 +26,8 @@ use graphviz_dot_builder::item::node::node::GraphVizNode;
 use graphviz_dot_builder::item::node::style::GraphvizNodeStyle;
 use graphviz_dot_builder::traits::DotBuildable;
 
-use crate::core::position::PositionInLanguageTerm;
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::position::PositionInLanguageTerm;
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
@@ -95,7 +95,7 @@ TDC : TermDrawingContext<LOS>
     }
     // the child nodes
     for (n,sub_term) in term.sub_terms.iter().enumerate() {
-        let child_pos = current_pos.clone().position_as_nth_sub_term(n);
+        let child_pos = current_pos.get_position_of_nth_child(n);
         let child_node_name = term_gv_repr_rec(
             tdc,
             sub_term,

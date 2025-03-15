@@ -20,10 +20,10 @@ use graph_process_manager_loggers::graphviz::drawers::legend_writer::ProcessLege
 use crate::rewriting_process::conf::RewriteConfig;
 use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 use crate::rewriting_process::filter::{RewriteNodePreFilter, RewriteStepFilter};
-use crate::rewriting_process::loggers::glog::legend_writer_utils::{get_rewrite_node_pre_filter_description, get_rewrite_parameters_description, get_rewrite_priorities_description, get_rewrite_step_filter_description};
+use crate::rewriting_process::loggers::glog::legend_writer_utils::{get_rewrite_node_pre_filter_description, get_rewrite_parameters_description, get_rewrite_step_filter_description};
 use crate::rewriting_process::priorities::RewritePriorities;
 use crate::rewriting_process::state::RewritingProcessState;
-use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
+use crate::tests::boolean_logic::lang::SimplisticBooleanLogicOperators;
 
 
 
@@ -31,20 +31,20 @@ use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
 pub struct MinimalLegendWriter {}
 
 
-impl ProcessLegendWriter<RewriteConfig<MinimalExampleLangOperators>> for MinimalLegendWriter {
+impl ProcessLegendWriter<RewriteConfig<SimplisticBooleanLogicOperators>> for MinimalLegendWriter {
     fn get_process_description(&self) -> String {
         "rewriting minimal language".to_string()
     }
 
-    fn get_parameters_description(&self, context_and_param : &RewritingProcessContextAndParameterization<MinimalExampleLangOperators>) -> Vec<Vec<String>> {
+    fn get_parameters_description(&self, context_and_param : &RewritingProcessContextAndParameterization<SimplisticBooleanLogicOperators>) -> Vec<Vec<String>> {
         get_rewrite_parameters_description(context_and_param)
     }
 
-    fn get_priorities_description(&self, priorities : &RewritePriorities) -> Vec<Vec<String>> {
-        get_rewrite_priorities_description(priorities)
+    fn get_priorities_description(&self, _priorities : &RewritePriorities) -> Vec<Vec<String>> {
+        vec![]
     }
 
-    fn get_step_filter_description(&self, filter : &dyn AbstractStepFilter<RewriteConfig<MinimalExampleLangOperators>>) -> Option<Vec<String>> {
+    fn get_step_filter_description(&self, filter : &dyn AbstractStepFilter<RewriteConfig<SimplisticBooleanLogicOperators>>) -> Option<Vec<String>> {
         match filter.as_any().downcast_ref::<RewriteStepFilter>() {
             Some(x) => {
                 Some(get_rewrite_step_filter_description(x))
@@ -55,8 +55,8 @@ impl ProcessLegendWriter<RewriteConfig<MinimalExampleLangOperators>> for Minimal
         }
     }
 
-    fn get_node_pre_filter_description(&self, filter : &dyn AbstractNodePreFilter<RewriteConfig<MinimalExampleLangOperators>>) -> Option<Vec<String>> {
-        match filter.as_any().downcast_ref::<RewriteNodePreFilter<MinimalExampleLangOperators>>() {
+    fn get_node_pre_filter_description(&self, filter : &dyn AbstractNodePreFilter<RewriteConfig<SimplisticBooleanLogicOperators>>) -> Option<Vec<String>> {
+        match filter.as_any().downcast_ref::<RewriteNodePreFilter<SimplisticBooleanLogicOperators>>() {
             Some(x) => {
                 Some(get_rewrite_node_pre_filter_description(x))
             }
@@ -66,14 +66,14 @@ impl ProcessLegendWriter<RewriteConfig<MinimalExampleLangOperators>> for Minimal
         }
     }
 
-    fn get_node_post_filter_description(&self, _filter : &dyn AbstractNodePostFilter<RewriteConfig<MinimalExampleLangOperators>>) -> Option<Vec<String>> {
+    fn get_node_post_filter_description(&self, _filter : &dyn AbstractNodePostFilter<RewriteConfig<SimplisticBooleanLogicOperators>>) -> Option<Vec<String>> {
         None
     }
 
     fn get_final_global_state_description_for_legend(
         &self, 
-        _context_and_param : &RewritingProcessContextAndParameterization<MinimalExampleLangOperators>,
-        _final_state : &RewritingProcessState<MinimalExampleLangOperators>
+        _context_and_param : &RewritingProcessContextAndParameterization<SimplisticBooleanLogicOperators>,
+        _final_state : &RewritingProcessState<SimplisticBooleanLogicOperators>
     ) -> Vec<String> {
         vec![]
     }

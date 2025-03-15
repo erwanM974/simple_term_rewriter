@@ -16,5 +16,5 @@ limitations under the License.
 
 
 pub mod probas;
-mod gen;
+pub mod gen;
 pub mod types;

@@ -16,9 +16,9 @@ limitations under the License.
 
 
 
-use crate::core::term::LanguageTerm;
+use crate::core::terms::term::LanguageTerm;
 
-use super::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 
 /**
   * A predicate that may hold or not on terms of the language which we are considering.

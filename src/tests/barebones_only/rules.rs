@@ -15,24 +15,51 @@ limitations under the License.
 */
 
 
+use std::fmt;
 
-use crate::core::{rule::RewriteRule, term::LanguageTerm};
-
-use super::lang::{MinimalExampleLangOperators, MinimalExampleTransformationKind};
-
-
-
+use crate::core::{rule::RewriteRule, terms::position::PositionInLanguageTerm};
+use crate::core::terms::term::LanguageTerm;
+use crate::tests::boolean_logic::lang::SimplisticBooleanLogicOperators;
 
 
-impl RewriteRule<MinimalExampleLangOperators> for MinimalExampleTransformationKind {
 
-    fn try_apply(&self, term : &LanguageTerm<MinimalExampleLangOperators>) 
-    -> Option<LanguageTerm<MinimalExampleLangOperators>> {
+
+
+
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub enum MinimalExampleTransformationKind {
+    DoubleNegation,
+    EvaluateNeg,
+    EvaluateAnd,
+    EvaluateOr
+}
+
+
+impl fmt::Display for MinimalExampleTransformationKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+
+
+
+
+impl RewriteRule<SimplisticBooleanLogicOperators> for MinimalExampleTransformationKind {
+
+    fn try_apply(
+        &self, 
+        term : &LanguageTerm<SimplisticBooleanLogicOperators>,
+        _context_term : &LanguageTerm<SimplisticBooleanLogicOperators>,
+        _position_in_context_term : &PositionInLanguageTerm
+    ) 
+    -> Option<LanguageTerm<SimplisticBooleanLogicOperators>> {
         match self {
             MinimalExampleTransformationKind::DoubleNegation => {
-                if term.operator == MinimalExampleLangOperators::NEG {
+                if term.operator == SimplisticBooleanLogicOperators::NEG {
                     let sub_term = term.sub_terms.first().unwrap();
-                    if sub_term.operator == MinimalExampleLangOperators::NEG {
+                    if sub_term.operator == SimplisticBooleanLogicOperators::NEG {
                         Some(sub_term.sub_terms.first().unwrap().clone())
                     } else {
                         None 
@@ -42,12 +69,12 @@ impl RewriteRule<MinimalExampleLangOperators> for MinimalExampleTransformationKi
                 }
             },
             MinimalExampleTransformationKind::EvaluateNeg => {
-                if term.operator == MinimalExampleLangOperators::NEG {
+                if term.operator == SimplisticBooleanLogicOperators::NEG {
                     let sub_term = term.sub_terms.first().unwrap();
-                    if sub_term.operator == MinimalExampleLangOperators::TRUE {
-                        Some(LanguageTerm::new(MinimalExampleLangOperators::FALSE, vec![]))
-                    } else if sub_term.operator == MinimalExampleLangOperators::FALSE {
-                        Some(LanguageTerm::new(MinimalExampleLangOperators::TRUE, vec![]))
+                    if sub_term.operator == SimplisticBooleanLogicOperators::TRUE {
+                        Some(LanguageTerm::new(SimplisticBooleanLogicOperators::FALSE, vec![]))
+                    } else if sub_term.operator == SimplisticBooleanLogicOperators::FALSE {
+                        Some(LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE, vec![]))
                     } else {
                         None
                     }
@@ -56,21 +83,21 @@ impl RewriteRule<MinimalExampleLangOperators> for MinimalExampleTransformationKi
                 }
             },
             MinimalExampleTransformationKind::EvaluateAnd => {
-                if term.operator == MinimalExampleLangOperators::AND {
+                if term.operator == SimplisticBooleanLogicOperators::AND {
                     let sub_term1 = term.sub_terms.first().unwrap();
                     let sub_term2 = term.sub_terms.get(1).unwrap();
                     match (&sub_term1.operator, &sub_term2.operator) {
-                        (MinimalExampleLangOperators::TRUE, MinimalExampleLangOperators::TRUE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::TRUE, vec![]))
+                        (SimplisticBooleanLogicOperators::TRUE, SimplisticBooleanLogicOperators::TRUE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE, vec![]))
                         },
-                        (MinimalExampleLangOperators::TRUE, MinimalExampleLangOperators::FALSE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::FALSE, vec![]))
+                        (SimplisticBooleanLogicOperators::TRUE, SimplisticBooleanLogicOperators::FALSE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::FALSE, vec![]))
                         },
-                        (MinimalExampleLangOperators::FALSE, MinimalExampleLangOperators::TRUE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::FALSE, vec![]))
+                        (SimplisticBooleanLogicOperators::FALSE, SimplisticBooleanLogicOperators::TRUE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::FALSE, vec![]))
                         },
-                        (MinimalExampleLangOperators::FALSE, MinimalExampleLangOperators::FALSE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::FALSE, vec![]))
+                        (SimplisticBooleanLogicOperators::FALSE, SimplisticBooleanLogicOperators::FALSE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::FALSE, vec![]))
                         },
                         (_,_) => {
                             None 
@@ -81,21 +108,21 @@ impl RewriteRule<MinimalExampleLangOperators> for MinimalExampleTransformationKi
                 }
             },
             MinimalExampleTransformationKind::EvaluateOr => {
-                if term.operator == MinimalExampleLangOperators::OR {
+                if term.operator == SimplisticBooleanLogicOperators::OR {
                     let sub_term1 = term.sub_terms.first().unwrap();
                     let sub_term2 = term.sub_terms.get(1).unwrap();
                     match (&sub_term1.operator, &sub_term2.operator) {
-                        (MinimalExampleLangOperators::TRUE, MinimalExampleLangOperators::TRUE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::TRUE, vec![]))
+                        (SimplisticBooleanLogicOperators::TRUE, SimplisticBooleanLogicOperators::TRUE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE, vec![]))
                         },
-                        (MinimalExampleLangOperators::TRUE, MinimalExampleLangOperators::FALSE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::TRUE, vec![]))
+                        (SimplisticBooleanLogicOperators::TRUE, SimplisticBooleanLogicOperators::FALSE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE, vec![]))
                         },
-                        (MinimalExampleLangOperators::FALSE, MinimalExampleLangOperators::TRUE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::TRUE, vec![]))
+                        (SimplisticBooleanLogicOperators::FALSE, SimplisticBooleanLogicOperators::TRUE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::TRUE, vec![]))
                         },
-                        (MinimalExampleLangOperators::FALSE, MinimalExampleLangOperators::FALSE) => {
-                            Some(LanguageTerm::new(MinimalExampleLangOperators::FALSE, vec![]))
+                        (SimplisticBooleanLogicOperators::FALSE, SimplisticBooleanLogicOperators::FALSE) => {
+                            Some(LanguageTerm::new(SimplisticBooleanLogicOperators::FALSE, vec![]))
                         },
                         (_,_) => {
                             None 

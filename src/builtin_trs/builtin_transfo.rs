@@ -17,7 +17,8 @@ limitations under the License.
 
 
 use crate::core::rule::RewriteRule;
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::position::PositionInLanguageTerm;
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 use crate::builtin_trs::rules::flush::{AssociativityChecker, transformation_flush_to_the_left, transformation_flush_to_the_right};
 use crate::builtin_trs::rules::reorder_commute::{BasicCommutativeCheckerAndOrderer, transformation_basic_reorder_subterms_under_commutative_operator};
@@ -82,7 +83,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
     }
 
     fn try_apply(&self,
-                 term : &LanguageTerm<LOS>
+                 term : &LanguageTerm<LOS>,
+                 context_term : &LanguageTerm<LOS>,
+                 position_in_context_term : &PositionInLanguageTerm
     ) -> Option<LanguageTerm<LOS>> {
         match &self.kind {
             BuiltinRewriteTransformationKind::AssociativeFlushRight(
@@ -90,7 +93,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_flush_to_the_right::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::AssociativeFlushLeft(
@@ -98,7 +103,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_flush_to_the_left::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::ReorderOperandsIfCommuteBasic(
@@ -106,7 +113,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_basic_reorder_subterms_under_commutative_operator::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::ReorderOperandsIfCommuteModuloAC(
@@ -114,7 +123,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_modulo_assoc_partial_reordering::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::GenericSimplifyUnderUnary(
@@ -122,7 +133,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_generic_simpl_under_unary_operator::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::GenericSimplifyUnderBinary(
@@ -130,7 +143,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_generic_simpl_under_binary_operator::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::FactorizeLeftDistributiveModuloAC(
@@ -138,7 +153,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_factorize_left_distributive_modulo_ac::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::FactorizeLeftDistributiveSimple(
@@ -146,7 +163,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_factorize_left_distributive::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::DeFactorizeLeftDistributive(
@@ -154,7 +173,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_defactorize_left_distributive::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::FactorizeRightDistributiveModuloAC(
@@ -162,7 +183,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_factorize_right_distributive_modulo_ac::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::FactorizeRightDistributiveSimple(
@@ -170,7 +193,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_factorize_right_distributive::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::DeFactorizeRightDistributive(
@@ -178,7 +203,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_defactorize_right_distributive::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
             BuiltinRewriteTransformationKind::ModuloAssociativeGenericFlattenedTransfo(
@@ -186,7 +213,9 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewriteRule<LOS> for BuiltinRewrite
             ) => {
                 transformation_modulo_associative_generic_flattened_transfo::<LOS>(
                     rule_application_checker,
-                    term
+                    term,
+                    context_term,
+                    position_in_context_term
                 )
             },
         }

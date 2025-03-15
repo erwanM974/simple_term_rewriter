@@ -15,4 +15,8 @@ limitations under the License.
 */
 
 
+#[cfg(feature = "process_draw_with_image")]
+pub mod all_the_rest_drawer_utils;
+
+
 pub mod legend_writer_utils;

@@ -16,7 +16,7 @@ limitations under the License.
 
 
 
-use super::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
 
 
 
@@ -33,11 +33,14 @@ pub trait RewriteRule<LOS : RewritableLanguageOperatorSymbol> {
     fn get_desc(&self) -> String;
 
     /** 
-     * If the rule is applicable at the root position of the given term, then it returns the result of its application.
+     * If the rule is applicable on the given term, then it returns the result of its application.
+     * Additional contextual information is given by "context_term" and "position_in_context_term"
      * **/
     fn try_apply(
         &self,
-        term : &LanguageTerm<LOS>
+        term : &LanguageTerm<LOS>,
+        context_term : &LanguageTerm<LOS>,
+        position_in_context_term : &PositionInLanguageTerm
     ) -> Option<LanguageTerm<LOS>>;
 
 }

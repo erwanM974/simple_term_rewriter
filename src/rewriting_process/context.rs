@@ -16,30 +16,50 @@ limitations under the License.
 
 
 
-use crate::core::{rule::RewriteRule, term::RewritableLanguageOperatorSymbol};
+use crate::core::rule::RewriteRule;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 
 
-pub struct RewritingProcessPhase<LOS : RewritableLanguageOperatorSymbol> {
+/** 
+ * An abstract rewriting phase that specifies how input terms may be rewritten via a classical TRS.
+ * It is abstract as it can be concretized several times.
+ * Once that term is rewritten and is irreducible, it may be forwarded to another rewriting phase.
+ * The identifier of these target "successor" phases are given in two cases:
+ * - in the case some rewriting has been performed and the irreducible term is different from the initial
+ * - and in the other case 
+ * **/
+pub struct AbstractRewritingPhase<LOS : RewritableLanguageOperatorSymbol> {
     pub rules : Vec<Box<dyn RewriteRule<LOS>>>,
-    pub keep_only_one : bool
+    pub next_phase_id_on_changed : Option<usize>,
+    pub next_phase_id_on_unchanged : Option<usize>
 }
 
-impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessPhase<LOS> {
+impl<LOS : RewritableLanguageOperatorSymbol> AbstractRewritingPhase<LOS> {
     pub fn new(
         rules: Vec<Box<dyn RewriteRule<LOS>>>, 
-        keep_only_one: bool
+        next_phase_id_on_changed : Option<usize>,
+        next_phase_id_on_unchanged : Option<usize>
     ) -> Self {
-        Self { rules, keep_only_one }
+        Self { rules, next_phase_id_on_changed, next_phase_id_on_unchanged }
     }
 }
 
+
+
+
+
+
 pub struct RewritingProcessContextAndParameterization<LOS : RewritableLanguageOperatorSymbol> {
-    pub phases : Vec<RewritingProcessPhase<LOS>>
+    pub phases : Vec<AbstractRewritingPhase<LOS>>,
+    pub keep_only_one : bool,
 }
 
 impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessContextAndParameterization<LOS> {
-    pub fn new(phases: Vec<RewritingProcessPhase<LOS>>) -> Self {
-        Self { phases }
+    pub fn new(
+        phases : Vec<AbstractRewritingPhase<LOS>>,
+        keep_only_one : bool,
+    ) -> Self {
+        Self { phases, keep_only_one }
     }
 }
 

@@ -17,7 +17,7 @@ limitations under the License.
 use std::hash::Hash;
 use rand::rngs::StdRng;
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 

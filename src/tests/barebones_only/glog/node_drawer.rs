@@ -24,16 +24,16 @@ use crate::draw_term::{draw_term_tree_with_graphviz, TermDrawingContext};
 use crate::rewriting_process::conf::RewriteConfig;
 use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 use crate::rewriting_process::node::RewriteNodeKind;
-use crate::tests::barebones_only::lang::MinimalExampleLangOperators;
+use crate::tests::boolean_logic::lang::SimplisticBooleanLogicOperators;
 
 
 
 pub struct MinimalRewritingNodeDrawer {}
 
-impl TermDrawingContext<MinimalExampleLangOperators> for MinimalRewritingNodeDrawer {
+impl TermDrawingContext<SimplisticBooleanLogicOperators> for MinimalRewritingNodeDrawer {
     fn get_operator_representation_as_graphviz_node_style(
         &self, 
-        operator : &MinimalExampleLangOperators
+        operator : &SimplisticBooleanLogicOperators
     ) -> GraphvizNodeStyle {
         vec![
             GraphvizNodeStyleItem::Label(format!("{:?}", operator))
@@ -41,19 +41,19 @@ impl TermDrawingContext<MinimalExampleLangOperators> for MinimalRewritingNodeDra
     }
 }
 
-impl CustomNodeDrawerForGraphvizLogger<RewriteConfig<MinimalExampleLangOperators>> for MinimalRewritingNodeDrawer {
+impl CustomNodeDrawerForGraphvizLogger<RewriteConfig<SimplisticBooleanLogicOperators>> for MinimalRewritingNodeDrawer {
 
     fn get_node_node_inner_style_and_draw_if_needed(
         &self,
-        _context_and_param : &RewritingProcessContextAndParameterization<MinimalExampleLangOperators>,
-        node : &RewriteNodeKind<MinimalExampleLangOperators>,
+        _context_and_param : &RewritingProcessContextAndParameterization<SimplisticBooleanLogicOperators>,
+        node : &RewriteNodeKind<SimplisticBooleanLogicOperators>,
         full_path : &Path
     ) -> BuiltinGraphvizLoggerItemStyle {
         // ***
         let temp_file_name = "temp.dot";
         let temp_path : PathBuf = [&temp_file_name].iter().collect();
         // ***
-        draw_term_tree_with_graphviz::<MinimalExampleLangOperators,MinimalRewritingNodeDrawer>(
+        draw_term_tree_with_graphviz::<SimplisticBooleanLogicOperators,MinimalRewritingNodeDrawer>(
             self,&node.term,&temp_path.as_path(),full_path
         );
         BuiltinGraphvizLoggerItemStyle::CustomImage

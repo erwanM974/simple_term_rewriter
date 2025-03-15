@@ -18,7 +18,7 @@ limitations under the License.
 
 use graph_process_manager_core::process::filter::{AbstractNodePreFilter, AbstractStepFilter};
 use crate::core::predicate::PredicateOnTerm;
-use crate::core::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 use crate::rewriting_process::conf::RewriteConfig;
 use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 use crate::rewriting_process::filtration::RewritingFiltrationResult;

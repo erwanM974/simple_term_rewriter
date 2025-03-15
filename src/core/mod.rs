@@ -14,12 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod conversion;
-pub mod apply;
-pub mod position;
-pub mod predicate;
+pub mod terms;
 pub mod rule;
-pub mod term;
+pub mod predicate;
 
 
 

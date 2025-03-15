@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
 
 
 /**
@@ -80,7 +80,9 @@ pub(crate) fn transformation_generic_simpl_under_unary_operator<
     LOS : RewritableLanguageOperatorSymbol
 >(
     checker : &Box<dyn GenericUnaryOperatorSimplifier<LOS>>,
-    term : &LanguageTerm<LOS>
+    term : &LanguageTerm<LOS>,
+    _context_term : &LanguageTerm<LOS>,
+    _position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
     let operator_at_root = &term.operator;
 

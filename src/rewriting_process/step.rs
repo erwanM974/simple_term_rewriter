@@ -16,14 +16,18 @@ limitations under the License.
 
 
 
-use crate::core::{apply::TermTransformationResult, term::RewritableLanguageOperatorSymbol};
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
+
+use crate::rewriting_process::apply::TermTransformationResult;
+
 
 
 
 
 pub enum RewriteStepKind<LOS : RewritableLanguageOperatorSymbol> {
-    Transform(TermTransformationResult<LOS>),
-    GoToPhase(usize)
+    TransformInSamePhase(TermTransformationResult<LOS>),
+    /// Go To Successor Phase, the bool = if the term was changed or not in the last phase
+    GoToSuccessorPhase(bool)
 }
 
 

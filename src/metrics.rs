@@ -20,7 +20,7 @@ use std::hash::Hash;
 use std::collections::{HashMap, HashSet};
 use std::marker::PhantomData;
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 

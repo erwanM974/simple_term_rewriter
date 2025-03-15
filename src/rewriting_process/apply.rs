@@ -15,11 +15,10 @@ limitations under the License.
 */
 
 
-use crate::core::position::*;
+use crate::core::terms::position::*;
 use crate::core::rule::RewriteRule;
-use crate::core::term::LanguageTerm;
-
-use super::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::LanguageTerm;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 
 
 /** 
@@ -33,7 +32,8 @@ use super::term::RewritableLanguageOperatorSymbol;
     pub phase_index : usize,
     pub rule_index_in_phase : usize,
     pub position : PositionInLanguageTerm,
-    pub result : LanguageTerm<LOS>
+    /// this is an Option so that we may take it later to propagate the result in the rewriting process without clone
+    pub result : Option<LanguageTerm<LOS>>
  }
 
  
@@ -47,19 +47,8 @@ impl<LOS : RewritableLanguageOperatorSymbol>  TermTransformationResult<LOS> {
             phase_index,
             rule_index_in_phase,
             position,
-            result
+            result : Some(result)
         }
-    }
-    pub fn new_at_root(
-        phase_index : usize,
-        rule_index_in_phase : usize,
-        result : LanguageTerm<LOS>) -> Self {
-        Self::new(
-            phase_index,
-            rule_index_in_phase,
-            PositionInLanguageTerm::get_root_position(),
-            result
-        )
     }
 }
 
@@ -75,26 +64,59 @@ pub fn get_transformations<LOS : RewritableLanguageOperatorSymbol>(
 ) 
         -> Vec<TermTransformationResult<LOS>>
 {   
+    get_transformations_rec(
+        phase_index,
+        rewrite_rules,
+        term,
+        keep_only_one,
+        term,
+        &PositionInLanguageTerm::get_root_position()
+    )
+}
+
+
+
+
+fn get_transformations_rec<LOS : RewritableLanguageOperatorSymbol>(
+    phase_index : usize,
+    rewrite_rules : &Vec<Box<dyn RewriteRule<LOS>>>,
+    term : &LanguageTerm<LOS>,
+    keep_only_one : bool,
+    context_term : &LanguageTerm<LOS>,
+    position_in_context_term : &PositionInLanguageTerm
+) 
+        -> Vec<TermTransformationResult<LOS>>
+{   
+    eprintln!("get transfos at pos {:}", position_in_context_term);
     let mut results = get_root_transformations(
         phase_index,
         rewrite_rules,
         term,
-        keep_only_one
+        keep_only_one,
+        context_term,
+        position_in_context_term
     );
     if keep_only_one && !results.is_empty() {
         return results;
     }
     for (n,sub_term) in term.sub_terms.iter().enumerate() {
-        for sub_transfo in get_transformations::<LOS>(phase_index,rewrite_rules, sub_term, keep_only_one) {
-            let upd_pos = sub_transfo.position.position_as_nth_sub_term(n);
+        let sub_position = position_in_context_term.get_position_of_nth_child(n);
+        for sub_transfo in get_transformations_rec::<LOS>(
+            phase_index,
+            rewrite_rules, 
+            sub_term, 
+            keep_only_one,
+            context_term,
+            &sub_position
+        ) {
             let mut upd_sub_terms : Vec<LanguageTerm<LOS>> = term.sub_terms.clone();
             upd_sub_terms.remove(n);
-            upd_sub_terms.insert(n,sub_transfo.result);
+            upd_sub_terms.insert(n,sub_transfo.result.unwrap());
             // ***
             let res = TermTransformationResult::new(
                 sub_transfo.phase_index,
                 sub_transfo.rule_index_in_phase,
-                upd_pos,
+                sub_transfo.position,
                 LanguageTerm::new(term.operator.clone(), upd_sub_terms) 
             );
             results.push(res);
@@ -112,14 +134,26 @@ fn get_root_transformations<LOS : RewritableLanguageOperatorSymbol>(
     phase_index : usize,
     rewrite_rules : &Vec<Box<dyn RewriteRule<LOS>>>,
     term : &LanguageTerm<LOS>,
-    keep_only_one : bool
+    keep_only_one : bool,
+    context_term : &LanguageTerm<LOS>,
+    position_in_context_term : &PositionInLanguageTerm
 ) -> Vec<TermTransformationResult<LOS>>
 {   
     let mut results = vec![];
     for (rule_index,rule) in rewrite_rules.iter().enumerate() {
-        if let Some(result) = rule.try_apply(term) {
+        eprintln!("try applying rule {:}", rule.get_desc());
+        if let Some(result) = rule.try_apply(
+            term,
+            context_term,
+            position_in_context_term
+        ) {
             results.push(
-                TermTransformationResult::new_at_root(phase_index,rule_index,result)
+                TermTransformationResult::new(
+                    phase_index,
+                    rule_index,
+                    position_in_context_term.clone(),
+                    result
+                )
             );
             if keep_only_one {
                 return results;

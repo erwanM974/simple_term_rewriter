@@ -16,7 +16,7 @@ limitations under the License.
 
 use std::marker::PhantomData;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
-use crate::core::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 use crate::rewriting_process::filtration::RewritingFiltrationResult;
 use crate::rewriting_process::handler::RewriteProcessHandler;

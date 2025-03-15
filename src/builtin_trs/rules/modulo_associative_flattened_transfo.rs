@@ -16,7 +16,8 @@ limitations under the License.
 
 
 use crate::builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively};
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::position::PositionInLanguageTerm;
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 /**
@@ -49,22 +50,19 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
     ) -> bool;
 
     /** 
-     * Returns None if the transformation does not involve a unary operator at the root.
-     * Returns Some(true) if it involves one and we have found one such operator at the root.
-     * Returns Some(false) if it involves one but we have not found one such operator at the root.
+     * The transformation may require having a specific parent operator above the root (i.e. the immediate parent of the term's root in the term's context).
+     * If this is the case, the "Fn(&LOS) -> bool" in the Option identifies it.
      * **/
-    fn if_required_is_a_parent_unary_operator_we_may_consider(
+    fn requires_a_specific_parent_operator(
         &self,
-        op : &LOS
-    ) -> Option<bool>;
+    ) -> Option<Box<dyn Fn(&LOS) -> bool>>;
     
     /** 
      * Transforms a term of the form:
-     * - either Y(X(z_1,...,z_n)) where Y is unary and X is binary associative
+     * - either Y(...,X(z_1,...,z_n),...) where X is binary associative
      * - or X(z_1,...,z_n) where X is binary associative
      * 
      * The return value consists of:
-     * - Option<&LangOp> in the first case, we may change Y to Y' (including the identify if None) 
      * - Vec<LanguageTerm<LangOp> in both cases, which correspond to the z'_1,...z'_m which substitute the z_1,...,z_n
      * **/
     fn transform_flattened_sub_terms(
@@ -72,44 +70,85 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
         considered_ac_op : &LOS, 
         considered_parent_op : Option<&LOS>,
         flattened_subterms : Vec<&LanguageTerm<LOS>>
-    ) -> Option<(Option<LOS>,Vec<LanguageTerm<LOS>>)>;
+    ) -> Option<Vec<LanguageTerm<LOS>>>;
 
 }
 
+
+
+fn ad_hoc_parent_checking_for_modulo_assoc_flattened_transfo<'a,LOS : RewritableLanguageOperatorSymbol>(
+    checker : &Box<dyn ModuloAssociativeGenericFlattenedChecker<LOS>>,
+    context_term : &'a LanguageTerm<LOS>,
+    position_in_context_term : &PositionInLanguageTerm,
+    considered_associative_operator : &LOS
+) -> Option<Option<&'a LOS>> {
+    match position_in_context_term.get_parent_position() {
+        None => {
+            // the position_in_context_term is the root so there is no parent at all
+            // ***
+            if checker.requires_a_specific_parent_operator().is_some() {
+                // here the transformation requires a specific parent operator but there is no parent
+                // so it cannot be applied
+                None
+            } else {
+                // here the transformation can be applied
+                // but there is no constraint on the parent operator
+                Some(None)
+            }
+        },
+        Some(parent_position) => {
+            // here there is a parent in the context_term
+            // and we get its operator
+            let parent_operator = &context_term.get_sub_term_at_position(&parent_position).unwrap().operator;
+            // ***
+            if let Some(parent_requirement) = checker.requires_a_specific_parent_operator() {
+                // if there is a requirement on the parent
+                if parent_requirement(parent_operator) {
+                    // if the parent satisfies this requirement then the transformation can be applied
+                    // and we propagate the knowledge of the parent operator
+                    Some(Some(parent_operator))
+                } else {
+                    // the parent does not satisfy the requirement so the transformation cannot be applied
+                    None
+                }
+            } else {
+                // there is no requirement on the parent
+                if parent_operator == considered_associative_operator {
+                    // if the parent is also the same operator, do not try applyng the transformation
+                    // as it can be done from the parent
+                    None
+                } else {
+                    Some(None)
+                }
+            }
+            // ***
+        }
+    }
+}
 
 
 pub(crate) fn transformation_modulo_associative_generic_flattened_transfo<
     LOS : RewritableLanguageOperatorSymbol
 >(
     checker : &Box<dyn ModuloAssociativeGenericFlattenedChecker<LOS>>,
-    term : &LanguageTerm<LOS>
+    term : &LanguageTerm<LOS>,
+    context_term : &LanguageTerm<LOS>,
+    position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
-    let (unary_op,ac_root) = match checker.if_required_is_a_parent_unary_operator_we_may_consider(&term.operator) {
-        None => {
-            // the transformation does not involve a parent unary operator
-            // so the binary AC operator we might consider is at the root of the term
-            (None,Some(term)) 
-        },
-        Some(unary_is_considered) => {
-            if unary_is_considered {
-                (Some(&term.operator),Some(term.sub_terms.first().unwrap()))
-            } else {
-                (None,None)
-            }
-        }
-    };
+    if checker.is_an_associative_binary_operator_we_may_consider(&term.operator) {
+        let considered_associative_operator = &term.operator;
 
-    if let Some(ac_root_term) = ac_root {
-        if checker.is_an_associative_binary_operator_we_may_consider(&ac_root_term.operator) {
-            let considered_associative_operator = &ac_root_term.operator;
+        if let Some(if_req_parent_op) = ad_hoc_parent_checking_for_modulo_assoc_flattened_transfo(
+            checker,context_term,position_in_context_term,considered_associative_operator
+        ) {
             let flattened_sub_terms = get_associative_sub_terms_recursively(
-                ac_root_term, 
+                term, 
                 considered_associative_operator
             );
-            if let Some( (new_parent,mut transformed_flattened) ) = checker.transform_flattened_sub_terms(
+            if let Some( mut transformed_flattened ) = checker.transform_flattened_sub_terms(
                 considered_associative_operator, 
-                unary_op,
+                if_req_parent_op,
                 flattened_sub_terms
             ) {
                 let folded_transformed = fold_associative_sub_terms_recursively(
@@ -117,13 +156,13 @@ pub(crate) fn transformation_modulo_associative_generic_flattened_transfo<
                     &mut transformed_flattened, 
                     &None
                 );
-                let got = match new_parent {
+                let got = match if_req_parent_op {
                     None => {
                        folded_transformed
                     },
-                    Some(new_parent_op) => {
+                    Some(parent_op) => {
                         LanguageTerm::new(
-                            new_parent_op, 
+                            parent_op.clone(), 
                             vec![folded_transformed]
                         )
                     }

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
 
 use super::distributivity_checker::DistributivityChecker;
 
@@ -33,7 +33,9 @@ OP2(OP1(x,y),OP1(x,z)) -> OP1(x,OP2(y,z))
  LOS : RewritableLanguageOperatorSymbol
 >(
  checker : &Box<dyn DistributivityChecker<LOS>>,
- term : &LanguageTerm<LOS>
+ term : &LanguageTerm<LOS>,
+ _context_term : &LanguageTerm<LOS>,
+ _position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
  let op2 = &term.operator;
@@ -85,7 +87,9 @@ OP2(OP1(y,x),OP1(z,x)) -> OP1(OP2(y,z),x)
  LOS : RewritableLanguageOperatorSymbol
 >(
  checker : &Box<dyn DistributivityChecker<LOS>>,
- term : &LanguageTerm<LOS>
+ term : &LanguageTerm<LOS>,
+ _context_term : &LanguageTerm<LOS>,
+ _position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
  let op2 = &term.operator;

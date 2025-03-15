@@ -16,7 +16,7 @@ limitations under the License.
 
 
 
-use crate::core::term::RewritableLanguageOperatorSymbol;
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
 
 
 

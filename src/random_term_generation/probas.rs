@@ -30,7 +30,7 @@ pub struct TermGenerationSymbolsProbabilities<CONF : RandomTermGenerationConfig>
 }
 
 
-
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum InteractionSymbolsProbabilitiesError {
     SymbolProbabilityMustBeBetweenOAnd1,
     SumOfProbabilitiesMustBe1
@@ -64,7 +64,7 @@ impl<CONF : RandomTermGenerationConfig> TermGenerationSymbolsProbabilities<CONF>
         for (idx,x) in self.ordered_bounds.iter().enumerate() {
             if got <= *x + 1e-6 {
                 if idx == 0 {
-                    return self.ordered_symbols.get(0).unwrap().clone();
+                    return self.ordered_symbols.first().unwrap().clone();
                 } else {
                     return self.ordered_symbols.get(idx-1).unwrap().clone();
                 }

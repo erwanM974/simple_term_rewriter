@@ -15,28 +15,60 @@ limitations under the License.
 */
 
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use graph_process_manager_core::process::persistent_state::AbstractProcessMutablePersistentState;
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use maplit::hashset;
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 use crate::rewriting_process::conf::RewriteConfig;
 use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
 use crate::rewriting_process::filtration::RewritingFiltrationResult;
 use crate::rewriting_process::node::RewriteNodeKind;
 use crate::rewriting_process::step::RewriteStepKind;
 
+
+
+/** 
+ * A concrete phase in the rewriting process.
+ * **/
+pub struct ConcreteRewritingPhaseInformation<LOS : RewritableLanguageOperatorSymbol> {
+    /// the id of the abstract phase which determines the rewrite rules that are applied during this concrete phase
+    pub model_abstract_phase_id : usize,
+    /// the initial terms before applying rewriting in this phase (should only be a single one if the previous phase is convergent)
+    pub initial_input_terms : HashSet<LanguageTerm<LOS>>,
+    /// the final irreducible terms after applying the rewriting in this phase (should only be a single one if the rewrite system is convergent)
+    pub final_irreducible_terms : HashSet<LanguageTerm<LOS>>,
+}
+
+impl<LOS: RewritableLanguageOperatorSymbol> ConcreteRewritingPhaseInformation<LOS> {
+    pub fn new(model_abstract_phase_id: usize, initial_input_terms: HashSet<LanguageTerm<LOS>>) -> Self {
+        Self { 
+            model_abstract_phase_id, 
+            initial_input_terms, 
+            final_irreducible_terms: HashSet::new() 
+        }
+    }
+}
+
+/** 
+ * The persistent global state of the rewriting process.
+ * **/
 pub struct RewritingProcessState<LOS : RewritableLanguageOperatorSymbol> {
-    /// keeps track of the irreducible terms encountered in each phase of the rewriting process
-    pub irreducible_terms_per_phase : HashMap<usize,Vec<LanguageTerm<LOS>>>,
+    /// keeps track of the concrete phases (each one being a classical TRS) that can be applied successively to rewrite the initial term
+    pub concrete_phases : Vec<ConcreteRewritingPhaseInformation<LOS>>,
+    pub successors_on_changed : HashMap<usize,usize>,
+    pub successors_on_unchanged : HashMap<usize,usize>,
     pub node_count : u32
 }
 
 impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessState<LOS> {
     pub fn new(
-        irreducible_terms_per_phase: HashMap<usize, Vec<LanguageTerm<LOS>>>,
+        concrete_phases : Vec<ConcreteRewritingPhaseInformation<LOS>>,
         node_count : u32
     ) -> Self {
         Self {
-            irreducible_terms_per_phase,
+            concrete_phases,
+            successors_on_changed : HashMap::new(),
+            successors_on_unchanged : HashMap::new(),
             node_count
         }
     }
@@ -44,16 +76,19 @@ impl<LOS : RewritableLanguageOperatorSymbol> RewritingProcessState<LOS> {
 
 impl<LOS : RewritableLanguageOperatorSymbol> AbstractProcessMutablePersistentState<RewriteConfig<LOS>> for RewritingProcessState<LOS> {
     fn get_initial_state(
-        context_and_param: &RewritingProcessContextAndParameterization<LOS>
+        _context_and_param: &RewritingProcessContextAndParameterization<LOS>,
+        initial_node : &RewriteNodeKind<LOS>
     ) -> Self {
-        let mut irreducible_terms_per_phase = HashMap::new();
-        for x in 0..context_and_param.phases.len() {
-            irreducible_terms_per_phase.insert(
-                x,
-                vec![]
-            );
-        }
-        Self::new(irreducible_terms_per_phase,0)
+        let concrete_phases = vec![
+            ConcreteRewritingPhaseInformation::new(
+                0,
+                hashset!{initial_node.term.clone()}
+            )
+        ];
+        Self::new(
+            concrete_phases,
+            0
+        )
     }
 
     fn update_on_node_reached(
@@ -67,29 +102,10 @@ impl<LOS : RewritableLanguageOperatorSymbol> AbstractProcessMutablePersistentSta
     fn update_on_next_steps_collected_reached(
         &mut self,
         _context_and_param: &RewritingProcessContextAndParameterization<LOS>,
-        node: &RewriteNodeKind<LOS>,
-        steps: &[RewriteStepKind<LOS>]
+        _node: &RewriteNodeKind<LOS>,
+        _steps: &[RewriteStepKind<LOS>]
     ) {
-        let reached_term_is_irreducible = match steps.len() {
-            0 => {
-                true
-            },
-            1 => {
-                let only_step = steps.first().unwrap();
-                matches!(only_step, RewriteStepKind::GoToPhase(_))
-            },
-            _ => {
-                false
-            }
-        };
-        if reached_term_is_irreducible {
-            let irrs = self.irreducible_terms_per_phase.get_mut(
-                &node.rewrite_system_index
-            ).unwrap();
-            if !irrs.contains(&node.term) {
-                irrs.push(node.term.clone());
-            }
-        }
+        // nothing
     }
 
     fn update_on_filtered(

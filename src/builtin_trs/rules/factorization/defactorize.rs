@@ -18,7 +18,7 @@ limitations under the License.
 
 
 
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
 
 use super::distributivity_checker::DistributivityChecker;
 
@@ -34,7 +34,9 @@ pub(crate) fn transformation_defactorize_left_distributive<
     LOS : RewritableLanguageOperatorSymbol
 >(
     checker : &Box<dyn DistributivityChecker<LOS>>,
-    term : &LanguageTerm<LOS>
+    term : &LanguageTerm<LOS>,
+    _context_term : &LanguageTerm<LOS>,
+    _position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
     let op1 = &term.operator;
@@ -88,7 +90,9 @@ pub(crate) fn transformation_defactorize_right_distributive<
     LOS : RewritableLanguageOperatorSymbol
 >(
     checker : &Box<dyn DistributivityChecker<LOS>>,
-    term : &LanguageTerm<LOS>
+    term : &LanguageTerm<LOS>,
+    _context_term : &LanguageTerm<LOS>,
+    _position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
     let op1 = &term.operator;

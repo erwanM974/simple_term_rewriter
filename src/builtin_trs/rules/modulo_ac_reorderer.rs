@@ -16,7 +16,8 @@ limitations under the License.
 
 
 use crate::builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively, is_greater_as_per_lexicographic_path_ordering};
-use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::core::terms::position::PositionInLanguageTerm;
+use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
@@ -48,50 +49,103 @@ use crate::core::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
 
 
 
+fn ad_hoc_partially_commutative_recursive_reorderer<
+    LOS : RewritableLanguageOperatorSymbol
+>(
+    checker : &Box<dyn ModuloAssociativePartialReorderer<LOS>>,
+    considered_ac_operator : &LOS,
+    flattened_sub_terms : Vec<LanguageTerm<LOS>>,
+    has_changed : &mut bool
+) -> Vec<LanguageTerm<LOS>> {
+    if flattened_sub_terms.len() <= 1 {
+        return flattened_sub_terms;
+    }
+
+    let mut flattened_sub_terms = flattened_sub_terms;
+    // get the head
+    let head = flattened_sub_terms.remove(0);
+    // then sort the tail
+    let mut sorted_tail = ad_hoc_partially_commutative_recursive_reorderer(
+        checker, 
+        considered_ac_operator,
+        flattened_sub_terms,
+        has_changed
+    );
+    // then compare the head with the head of the sorted tail
+    let heaf_of_sorted_tail = sorted_tail.remove(0);
+    let mut remainder = sorted_tail;
+    if checker.may_commute_under(
+        considered_ac_operator, 
+        &head,
+        &heaf_of_sorted_tail
+    ) && is_greater_as_per_lexicographic_path_ordering(
+        &head, 
+        &heaf_of_sorted_tail, 
+        &|x,y| checker.compare_operators(x,y),
+        &|x| checker.get_arity(x),
+    ) {
+        // here the "head_of_sorted_tail" should be put before the "head"
+        *has_changed = true;
+        // ***
+        remainder.insert(0, head);
+        let mut remainder = ad_hoc_partially_commutative_recursive_reorderer(
+            checker, 
+            considered_ac_operator,
+            remainder,has_changed
+        );
+        remainder.insert(0, heaf_of_sorted_tail);
+        remainder
+    } else {
+        remainder.insert(0, heaf_of_sorted_tail);
+        remainder.insert(0, head);
+        remainder
+    }
+}
+
+
 pub(crate) fn transformation_modulo_assoc_partial_reordering<
     LOS : RewritableLanguageOperatorSymbol
 >(
     checker : &Box<dyn ModuloAssociativePartialReorderer<LOS>>,
-    term : &LanguageTerm<LOS>
+    term : &LanguageTerm<LOS>,
+    context_term : &LanguageTerm<LOS>,
+    position_in_context_term : &PositionInLanguageTerm
 ) -> Option<LanguageTerm<LOS>> {
 
     if checker.is_an_associative_partially_commutative_binary_operator_we_may_consider(&term.operator) {
         let considered_ac_operator = &term.operator;
-        let mut flattened_sub_terms : Vec<LanguageTerm<LOS>> = get_associative_sub_terms_recursively(
-            term, 
-            considered_ac_operator
-        ).iter().copied().cloned().collect();
-        // ***
-        let mut has_changed_global = false;
+
         {
-            // try to reorder the sub_terms that may commute as per the lexicographic path ordering
-            let mut has_changed = true;
-            while has_changed {
-                has_changed = false;
-                for i in 0..(flattened_sub_terms.len()-1) {
-                    let s1 = flattened_sub_terms.get(i).unwrap();
-                    let s2 = flattened_sub_terms.get(i+1).unwrap();
-                    if checker.may_commute_under(
-                        considered_ac_operator, 
-                        s1,
-                        s2
-                    ) && is_greater_as_per_lexicographic_path_ordering(
-                        s1, 
-                        s2, 
-                        &|x,y| checker.compare_operators(x,y),
-                        &|x| checker.get_arity(x),
-                    ) {
-                        flattened_sub_terms.swap(i, i+1);
-                        has_changed = true;
-                        has_changed_global = true;
+            // if the parent is also the same operator, do not try applyng the transformation
+            // as it can be done from the parent
+            if let Some(parent_pos) = position_in_context_term.get_parent_position() {
+                if let Some(parent_term) = context_term.get_sub_term_at_position(
+                    &parent_pos
+                ) {
+                    if &parent_term.operator == considered_ac_operator {
+                        return None;
                     }
                 }
             }
         }
-        if has_changed_global {
+
+        let flattened_sub_terms : Vec<LanguageTerm<LOS>> = get_associative_sub_terms_recursively(
+            term, 
+            considered_ac_operator
+        ).iter().copied().cloned().collect();
+        // ***
+        let mut has_changed = false;
+        let mut sorted_flattened_sub_terms = ad_hoc_partially_commutative_recursive_reorderer(
+            checker, 
+            considered_ac_operator, 
+            flattened_sub_terms, 
+            &mut has_changed
+        );
+        // ***
+        if has_changed {
             let folded_transformed = fold_associative_sub_terms_recursively(
                 considered_ac_operator,
-                &mut flattened_sub_terms, 
+                &mut sorted_flattened_sub_terms, 
                 &None
             );
             return Some(folded_transformed);
@@ -105,7 +159,7 @@ pub(crate) fn transformation_modulo_assoc_partial_reordering<
 
 #[cfg(test)]
 mod test {
-    use crate::{builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively}, core::term::{LanguageTerm, RewritableLanguageOperatorSymbol}};
+    use crate::{builtin_trs::util::{fold_associative_sub_terms_recursively, get_associative_sub_terms_recursively}, core::terms::{position::PositionInLanguageTerm, term::{LanguageTerm, RewritableLanguageOperatorSymbol}}};
 
     use super::{transformation_modulo_assoc_partial_reordering, ModuloAssociativePartialReorderer};
 
@@ -133,8 +187,8 @@ mod test {
         fn may_commute_under(
             &self,
             parent_op :&TestOperator,
-            left_sub_term : &crate::core::term::LanguageTerm<TestOperator>,
-            right_sub_term : &crate::core::term::LanguageTerm<TestOperator>,
+            left_sub_term : &crate::core::terms::term::LanguageTerm<TestOperator>,
+            right_sub_term : &crate::core::terms::term::LanguageTerm<TestOperator>,
         ) -> bool {
             assert!(parent_op == &TestOperator::THEN);
             left_sub_term.operator != TestOperator::STOP && right_sub_term.operator != TestOperator::STOP
@@ -210,7 +264,9 @@ mod test {
 
         let got = transformation_modulo_assoc_partial_reordering(
             &reordered,
-            &term
+            &term,
+            &term,
+            &PositionInLanguageTerm::get_root_position()
         );
         assert!(got.is_some());
         if let Some(reordered) = got {

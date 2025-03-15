@@ -15,9 +15,9 @@ limitations under the License.
 */
 
 
-use std::collections::HashSet;
-
-use crate::{core::term::RewritableLanguageOperatorSymbol, rewriting_process::{context::RewritingProcessContextAndParameterization, filter::{RewriteNodePreFilter, RewriteStepFilter}, priorities::RewritePriorities}};
+use crate::core::terms::term::RewritableLanguageOperatorSymbol;
+use crate::rewriting_process::context::RewritingProcessContextAndParameterization;
+use crate::rewriting_process::filter::{RewriteNodePreFilter, RewriteStepFilter};
 
 
 pub fn get_rewrite_parameters_description<LOS : RewritableLanguageOperatorSymbol>(
@@ -40,7 +40,23 @@ pub fn get_rewrite_parameters_description<LOS : RewritableLanguageOperatorSymbol
         }
         param_desc.push("  ];".to_string());
         // ***
-        param_desc.push(format!("  keep_only_one = {:};", phase.keep_only_one));
+        match phase.next_phase_id_on_unchanged {
+            None => {
+                param_desc.push("  next_phase_on_unchanged = None;".to_string());
+            },
+            Some(p_id) => {
+                param_desc.push(format!("  next_phase_on_unchanged = phase {:};", p_id));
+            }
+        }
+        // ***
+        match phase.next_phase_id_on_changed {
+            None => {
+                param_desc.push("  next_phase_on_changed = None;".to_string());
+            },
+            Some(p_id) => {
+                param_desc.push(format!("  next_phase_on_changed = phase {:};", p_id));
+            }
+        }
         // ***
         param_desc.push("]".to_string());
         // ***
@@ -50,42 +66,6 @@ pub fn get_rewrite_parameters_description<LOS : RewritableLanguageOperatorSymbol
 }
 
 
-
-pub fn get_rewrite_priorities_description(priorities : &RewritePriorities) -> Vec<Vec<String>> {
-    let mut priorities_descs = vec![];
-    let sorted_phases = {
-        let all_phases : HashSet<usize> = priorities.rewrite_rules_priorities.keys().chain(priorities.depth_modifiers.keys()).cloned().collect();
-        let mut x : Vec<usize> = all_phases.into_iter().collect();
-        x.sort();
-        x  
-    };
-    for phase_id in sorted_phases {
-        let mut p_desc = vec![];
-        p_desc.push(format!("phase {} : [",phase_id));
-        // ***
-        if let Some(rules_priorities) = priorities.rewrite_rules_priorities.get(&phase_id) {
-            let sorted_rules = {
-                let all_rules : HashSet<usize> = rules_priorities.keys().cloned().collect();
-                let mut x : Vec<usize> = all_rules.into_iter().collect();
-                x.sort();
-                x  
-            };
-            let rules_descs : Vec<String> = sorted_rules.into_iter()
-            .map(|x| format!("rule {} = {}", x, rules_priorities.get(&x).unwrap())).collect();
-            p_desc.push(format!("  rules = [{}]", rules_descs.join(", ")));
-        }
-        // ***
-        if let Some(depth_mod) = priorities.depth_modifiers.get(&phase_id) {
-            p_desc.push(format!("  depth_modifier = {}", depth_mod));
-        }
-        // ***
-        p_desc.push("]".to_string());
-        priorities_descs.push(p_desc);
-    }
-    priorities_descs.push(vec![format!("next_phase_priority = {}", priorities.next_phase_priority)]);
-    // ***
-    priorities_descs
-}
 
 pub fn get_rewrite_step_filter_description(filter : &RewriteStepFilter) -> Vec<String> {
     match filter {
