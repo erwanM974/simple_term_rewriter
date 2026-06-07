@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod gen;
-pub mod probas;
-pub mod types;
+pub mod defactorize;
+pub mod distributivity_checker;
+pub mod factorize_modulo_ac;
+pub mod factorize_simple;

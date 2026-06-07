@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod gen;
-pub mod probas;
-pub mod types;
+pub mod factorization;
+pub mod flat_apc;
+pub mod flush;
+pub mod reorder_apc;
+pub mod reorder_pc;
+pub mod root;

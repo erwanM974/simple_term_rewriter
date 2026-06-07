@@ -14,47 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use std::hash::Hash;
 use rand::rngs::StdRng;
+use std::hash::Hash;
 
-use crate::core::terms::term::{LanguageTerm, RewritableLanguageOperatorSymbol};
+use crate::term::syntax::{LanguageTerm, RewritableLanguageOperatorSymbol, TermFactory};
 
+/// Configuration bundle for random term generation.
+///
+/// Implement this trait to tie together the language operator symbol type,
+/// an optional generation context, and a pattern type.
+pub trait RandomTermGenerationConfig: Sized {
+    /// The language operator symbol type for the language being generated.
+    type LOS: RewritableLanguageOperatorSymbol;
 
-
-
-pub trait RandomTermGenerationConfig : Sized {
-
-    type LOS : RewritableLanguageOperatorSymbol;
-
+    /// Arbitrary context data threaded through the generation process
+    /// (e.g. a variable pool or a grammar).
     type CONTEXT;
 
-    type PATTERN : TermPatternForRandomGeneration<Self>;
-
-    fn get_arity(op : &Self::LOS) -> usize;
-
+    /// The pattern type used to generate structured sub-terms.
+    type PATTERN: TermPatternForRandomGeneration<Self>;
 }
 
-
-pub trait TermPatternForRandomGeneration<CONF : RandomTermGenerationConfig> : Clone + PartialEq + Eq + Hash {
-
+/// A structured sub-term pattern that can generate a concrete [`LanguageTerm`] on demand.
+///
+/// Patterns allow the random generator to produce semantically interesting
+/// sub-trees (e.g. well-typed expressions or atoms drawn from a fixed set)
+/// rather than purely random operator applications.
+pub trait TermPatternForRandomGeneration<CONF: RandomTermGenerationConfig>:
+    Clone + PartialEq + Eq + Hash
+{
+    /// Generates a concrete term from this pattern using `rng` and `context`.
     fn generate_term_from_pattern(
         &self,
-        rng : &mut StdRng,
-        context : &CONF::CONTEXT
+        rng: &mut StdRng,
+        context: &CONF::CONTEXT,
+        factory: &mut TermFactory<CONF::LOS>,
     ) -> LanguageTerm<CONF::LOS>;
-
 }
 
-
-
-
-
+/// A symbol the random generator may choose at each node: either a concrete
+/// language operator or a structured pattern.
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub enum TermGenerationSymbol<LOS,PATTERN> {
+pub enum TermGenerationSymbol<LOS, PATTERN> {
+    /// A concrete language operator; its arity determines how many sub-terms are generated.
     LanguageSymbol(LOS),
-    Pattern(PATTERN)
+    /// A pattern that generates an entire sub-tree directly.
+    Pattern(PATTERN),
 }
-
-
-
-
