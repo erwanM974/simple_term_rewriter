@@ -89,6 +89,10 @@ impl<LOS: RewritableLanguageOperatorSymbol> RewriteRule<LOS> for FlattenedACTran
         _pos: &PositionInLanguageTerm,
         factory: &mut TermFactory<LOS>,
     ) -> Option<LanguageTerm<LOS>> {
-        transformation_modulo_associative_generic_flattened_transfo(self.checker.as_ref(), term, factory)
+        transformation_modulo_associative_generic_flattened_transfo(
+            self.checker.as_ref(),
+            term,
+            factory,
+        )
     }
 }

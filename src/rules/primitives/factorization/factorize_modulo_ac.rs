@@ -67,7 +67,8 @@ fn transformation_factorize_left_distributive_modulo_ac<LOS: RewritableLanguageO
     let mut factorized_indices = HashSet::new();
 
     for head_op in head_operators {
-        let mut found: HashMap<&LanguageTerm<LOS>, Vec<(usize, Vec<LanguageTerm<LOS>>)>> = HashMap::new();
+        let mut found: HashMap<&LanguageTerm<LOS>, Vec<(usize, Vec<LanguageTerm<LOS>>)>> =
+            HashMap::new();
         for (idx, sub) in sub_terms.iter().enumerate() {
             if sub.operator == head_op {
                 let sub_sub = if checker.is_associative(&head_op) {
@@ -172,7 +173,8 @@ fn transformation_factorize_right_distributive_modulo_ac<LOS: RewritableLanguage
     let mut factorized_indices = HashSet::new();
 
     for head_op in head_operators {
-        let mut found: HashMap<&LanguageTerm<LOS>, Vec<(usize, Vec<LanguageTerm<LOS>>)>> = HashMap::new();
+        let mut found: HashMap<&LanguageTerm<LOS>, Vec<(usize, Vec<LanguageTerm<LOS>>)>> =
+            HashMap::new();
         for (idx, sub) in sub_terms.iter().enumerate() {
             if sub.operator == head_op {
                 let sub_sub = if checker.is_associative(&head_op) {
@@ -269,7 +271,13 @@ impl<LOS: RewritableLanguageOperatorSymbol> RewriteRule<LOS> for FactorizeLeftMo
         pos: &PositionInLanguageTerm,
         factory: &mut TermFactory<LOS>,
     ) -> Option<LanguageTerm<LOS>> {
-        transformation_factorize_left_distributive_modulo_ac(self.checker.as_ref(), term, ctx, pos, factory)
+        transformation_factorize_left_distributive_modulo_ac(
+            self.checker.as_ref(),
+            term,
+            ctx,
+            pos,
+            factory,
+        )
     }
 }
 

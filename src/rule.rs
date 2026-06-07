@@ -88,8 +88,15 @@ pub trait RewriteRule<LOS: RewritableLanguageOperatorSymbol> {
 /// ```
 #[allow(clippy::type_complexity)]
 pub struct ClosureRewriteRule<LOS: RewritableLanguageOperatorSymbol> {
-    desc  : String,
-    apply : Box<dyn Fn(&LanguageTerm<LOS>, &LanguageTerm<LOS>, &PositionInLanguageTerm, &mut TermFactory<LOS>) -> Option<LanguageTerm<LOS>>>,
+    desc: String,
+    apply: Box<
+        dyn Fn(
+            &LanguageTerm<LOS>,
+            &LanguageTerm<LOS>,
+            &PositionInLanguageTerm,
+            &mut TermFactory<LOS>,
+        ) -> Option<LanguageTerm<LOS>>,
+    >,
 }
 
 impl<LOS: RewritableLanguageOperatorSymbol> ClosureRewriteRule<LOS> {

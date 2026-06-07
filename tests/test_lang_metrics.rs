@@ -45,9 +45,9 @@ enum RegexMetric {
 impl fmt::Display for RegexMetric {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RegexMetric::Leaf   => write!(f, "leaf"),
+            RegexMetric::Leaf => write!(f, "leaf"),
             RegexMetric::Binary => write!(f, "binary"),
-            RegexMetric::Unary  => write!(f, "unary"),
+            RegexMetric::Unary => write!(f, "unary"),
         }
     }
 }

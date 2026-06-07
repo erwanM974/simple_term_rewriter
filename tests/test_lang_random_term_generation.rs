@@ -144,12 +144,15 @@ fn all_operators_are_reachable() {
     for t in &terms {
         collect_operators(t, &mut ops);
     }
-    assert!(ops.contains(&RegexOp::Empty),   "Empty not seen");
+    assert!(ops.contains(&RegexOp::Empty), "Empty not seen");
     assert!(ops.contains(&RegexOp::Epsilon), "Epsilon not seen");
-    assert!(ops.iter().any(|op| matches!(op, RegexOp::Atom(_))), "Atom not seen");
-    assert!(ops.contains(&RegexOp::Alt),     "Alt not seen");
-    assert!(ops.contains(&RegexOp::Concat),  "Concat not seen");
-    assert!(ops.contains(&RegexOp::Star),    "Star not seen");
+    assert!(
+        ops.iter().any(|op| matches!(op, RegexOp::Atom(_))),
+        "Atom not seen"
+    );
+    assert!(ops.contains(&RegexOp::Alt), "Alt not seen");
+    assert!(ops.contains(&RegexOp::Concat), "Concat not seen");
+    assert!(ops.contains(&RegexOp::Star), "Star not seen");
 }
 
 // == Pattern arm: stop criterion ===============================================
